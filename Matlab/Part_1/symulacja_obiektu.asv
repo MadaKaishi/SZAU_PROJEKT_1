@@ -1,0 +1,10 @@
+clc;
+clear all;
+
+%Constants
+A1 = 505;
+C2 = 0.65;
+ap1 = 23; %alfa_1
+ap2 = 15; %alfa_2
+
+ode45(@dvdt)
