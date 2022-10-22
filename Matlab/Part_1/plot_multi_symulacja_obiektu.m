@@ -18,21 +18,28 @@ FD = 15;
 v2_0 = h2_0^2 * C2;
 v1_0 = h1_0 * A1;
 
+for F1 = 36:21:120
 %Obliczanie Dynamiki Objętości
 funkcja = @(t,v)stan_ciagly(t,v,F1,FD,A1,C2,ap1,ap2,tau) ;
-[t,v] = ode45(funkcja,[200, 2000],[v1_0;v2_0]);
+[t,v] = ode45(funkcja,[0, 2000],[v1_0;v2_0]);
 
 %Obliczanie Wysokości na podstawie objętości
-h(:,1) = v(:,1) / A1;
 h(:,2) = sqrt(v(:,2) /C2);
 
 %Plot h/t
-figure;
 set(0,'defaultLineLineWidth',1);
 set(0,'DefaultStairLineWidth',1);
-plot(t,h(:,1));
-hold on;
 plot(t,h(:,2));
-legend("h_1","h_2");
-xlabel("Czas"); ylabel("Wysokość");
-print('h1_h2_niel.png','-dpng','-r400')
+hold on
+name = "F_1 = "+ F1;
+clear h;
+end
+
+xlabel("Czas"); ylabel("h_2");
+
+lgd = cell(5,1) ;
+for i=1:5
+    lgd{i} = strcat('F_1= ',num2str(15+21*i)) ;
+end
+legend(lgd,Location="northoutside",Orientation="horizontal")
+print('h2_niel.png','-dpng','-r400')
