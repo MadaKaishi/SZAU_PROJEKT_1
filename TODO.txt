@@ -1,0 +1,30 @@
+Zadanie 1:
+
+-Naprawić kod ode (coś z tym 2 równaniem)
+-Linearyzacja obiektu
+-Porównanie obiektu zlinearyzowanego i nieliniowego
+-Komentarz do porównania
+-Uzasadnienie czemu DMC better (no bo obiekt ma wysokie opoznienie)
+-Aktualizacja sprawka (te równania wprowadzić takie jak ostatecznie będą w MatLabie)
+-Napisać DMC nierozmyty
+
+
+Zadanie 2:
+
+-Zrobić model rozmyty z 2,3,4,5 możliwościami selekcji
+-Porównać model rozmyty z liniowym i nieliniowym (tych z Zadania 1)
+-Wybrać który z rozmytych jest najlepszy (2,3,4 czy 5)
+
+-Napisanie rozmytego DMC
+-Analiza gdy jest rozmyty DMC
+
+Zadanie 3:
+
+-Numeryczny algorytm predykcyjny typu SL
+-Porównanie tego z 2 zadania i 3
+
+Zdanie 4:
+
+-Zaprojektowanie numerycznego, rozmytego algorytmu regulacji predykcyjnej NPL
+
+
