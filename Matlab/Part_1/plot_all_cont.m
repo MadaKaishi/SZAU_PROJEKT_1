@@ -36,15 +36,14 @@ h_niel(:,2) = sqrt(v_niel(:,2) /C2);
 %Plot h/t
 set(0,'defaultLineLineWidth',1);
 set(0,'DefaultStairLineWidth',1);
-plot(t_lin,h_lin(:,2),"LineStyle","--");
-%plot(t_niel,h_niel(:,2));
+plot(t_niel,h_niel(:,2),"Color","r");
 hold on
+plot(t_lin,h_lin(:,2),"LineStyle","--","Color","b");
 name = "F_1 = "+ F1;
 clear h_lin;
 clear h_niel;
 end
-
 xlabel("Czas"); ylabel("h_2");
 title("Porownanie obiektów")
-legend(name,Location="northoutside",Orientation="horizontal")
-%print('h2_zlin.png','-dpng','-r400')
+legend("Obiekt nieliniowy","Obiekt zlinearyzowany","Location","northoutside")
+print('porow_2_obiekt.png','-dpng','-r400')
