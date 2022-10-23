@@ -1,8 +1,8 @@
 Zadanie 1:
 
--Naprawić kod ode (coś z tym 2 równaniem)
--Linearyzacja obiektu
--Porównanie obiektu zlinearyzowanego i nieliniowego
+-Naprawić kod ode x
+-Linearyzacja obiektu (done ale trzeba sprawdzic)
+-Porównanie obiektu zlinearyzowanego i nieliniowego ~
 -Komentarz do porównania
 -Uzasadnienie czemu DMC better (no bo obiekt ma wysokie opoznienie)
 -Aktualizacja sprawka (te równania wprowadzić takie jak ostatecznie będą w MatLabie)
