@@ -30,7 +30,7 @@ FD(1:T:t_sym/T) = FD;
 
 for k = kp:t_sym/T
     if k/T > 150
-        F1in(k) = 120;
+        F1in(k) = 12;
     end
     v1(k) = v1(k-1) + T*(F1in(k-1-(tau/T)) + FD(k-1) - ap1*sqrt(v1(k-1)/A1));
     v2(k) = v2(k-1) + T*(ap1*sqrt(v1(k-1)/A1) - ap2*(nthroot(v2(k-1)/C2,4)));  
