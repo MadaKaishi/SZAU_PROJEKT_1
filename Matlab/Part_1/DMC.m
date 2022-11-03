@@ -28,7 +28,7 @@ FD = 15;
 v2_0 = h2_0^2 * C2;
 v1_0 = h1_0 * A1;
 
-t_sym = 5000; %czas symulacji
+t_sym = 15000; %czas symulacji
 T = 1; %krok
 
 %warunki_początkowe
@@ -101,7 +101,10 @@ FD = 15;
 FDc(1:T:t_sym/T) = FD;
 
 %Skok wartosci zadanej:
-yzad(1:ks)=38.44; yzad(ks:kk)=30;
+yzad(1:ks)=38.44; 
+yzad(ks:5000)=50;
+yzad(5000:10000)=30;
+yzad(10000:15000)=40;
 
 %główne wykonanie programu
 for k=kp:kk
@@ -135,4 +138,13 @@ stairs(iteracja, h2)
 hold on;
 stairs(iteracja, yzad,"--");
 hold off;
-xlabel('k'); ylabel("y");
+xlabel('k'); ylabel("h");
+legend("h_2","h_2_z_a_d")
+print('DMC_reg.png','-dpng','-r400')
+
+%Plot sterowanie
+figure;
+stairs(iteracja, F1in)
+legend("F_1_i_n")
+xlabel('k'); ylabel("F_1_i_n");
+print('DMC_ster.png','-dpng','-r400')
