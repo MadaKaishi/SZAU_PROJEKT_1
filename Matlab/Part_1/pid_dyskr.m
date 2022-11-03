@@ -36,9 +36,9 @@ yzad(1:kp) = 38.44;
 yzad(kp:kk) = 50;
 
 %Nastawy PID
-Kp = 0.8;
-Ti = 3.15;
-Td = 0.76;
+Kp = 1.93;
+Ti = 250;
+Td = 60;
 
 r0 = Kp*(1 + T/(2*Ti) + Td/T);
 r1 = Kp*(T/(2*Ti) - (2*Td)/T -1);
@@ -52,7 +52,7 @@ for k = kp:t_sym/T
     h2(k) = sqrt(v2(k)/C2);
 
     %PID
-    e(k) = h2(k) - yzad(k);
+    e(k) = yzad(k) - h2(k);
     F1in(k) = F1in(k-1) + r0*e(k) + r1*e(k-1) + r2*e(k-2);
 
 end
