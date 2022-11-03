@@ -1,8 +1,8 @@
 clear; clc;
 
 %Parametry regulatora
-Nu = 500;
-N = 500;
+Nu = 2;
+N = 8;
 D = 1500;
 lamb = 100;
 
@@ -101,7 +101,7 @@ FD = 15;
 FDc(1:T:t_sym/T) = FD;
 
 %Skok wartosci zadanej:
-yzad(1:ks)=38.44; yzad(ks:kk)=39;
+yzad(1:ks)=38.44; yzad(ks:kk)=30;
 
 %główne wykonanie programu
 for k=kp:kk
@@ -110,10 +110,10 @@ for k=kp:kk
         Y_zad(n,1) = yzad(k);
     end
     %symulacja obiektu
-    v1(k) = v1(k-1) + T*(F1in(k-1-(tau/T)) - F1 + FDc(k-1) - FD - (ap1/(2*(sqrt(h1_0))))*(h1(k-1)-h1_0));
-    v2(k) = v2(k-1) + T*((ap1/(2*(sqrt(h1_0))))*(h1(k-1)-h1_0) - (ap2/(2*(sqrt(h2_0))))*(h2(k-1)-h2_0)); 
-    h2(k) = h2_0 + 1/(2*sqrt(C2*v2_0))*(v2(k) - v2_0);
+    v1(k) = v1(k-1) + T*(F1in(k-1-(tau/T)) + FDc(k-1) - ap1*sqrt(h1(k-1)));
+    v2(k) = v2(k-1) + T*(ap1*sqrt(h1(k-1)) - ap2*(sqrt(h2(k-1))));
     h1(k) = v1(k)/A1;
+    h2(k) = sqrt(v2(k)/C2);
     %stała trajektoria referencyjna
     for n=1:N
         Y(n) = h2(k);
