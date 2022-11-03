@@ -1,10 +1,12 @@
 clear; clc;
 
 %Parametry regulatora
-Nu = 450;
-N = 600;
-D = N;
+Nu = 500;
+N = 500;
+D = 1500;
 lamb = 100;
+
+%% Wymierzanie skoku jednostkowego
 
 %skok wartosci F1
 dF1 = 1;
@@ -26,7 +28,7 @@ FD = 15;
 v2_0 = h2_0^2 * C2;
 v1_0 = h1_0 * A1;
 
-t_sym = 3000; %czas symulacji
+t_sym = 5000; %czas symulacji
 T = 1; %krok
 
 %warunki_początkowe
@@ -36,17 +38,13 @@ kk = t_sym/T;
 v1(1:kp) = v1_0;
 v2(1:kp) = v2_0;
 F1in(1:T:t_sym/T) = F1;
-FD(1:T:t_sym/T) = FD;
-
-
-%Wartosc zadana
-yzad(1:ks)=78; yzad(ks:kk)=80;
+FDc(1:T:t_sym/T) = FD;
 
 
 %Symulacja obiektu
 for k = kp:t_sym/T
     F1in(k) = F1+dF1;
-    v1(k) = v1(k-1) + T*(F1in(k-1-(tau/T)) + FD(k-1) - ap1*sqrt(v1(k-1)/A1));
+    v1(k) = v1(k-1) + T*(F1in(k-1-(tau/T)) + FDc(k-1) - ap1*sqrt(v1(k-1)/A1));
     v2(k) = v2(k-1) + T*(ap1*sqrt(v1(k-1)/A1) - ap2*(nthroot(v2(k-1)/C2,4)));  
 end
 %Obliczanie Wysokości na podstawie objętości
@@ -56,7 +54,10 @@ h2(:,1) = sqrt(v2 /C2);
 Yj = h2 - min(h2);
 Yj = Yj/dF1;
 s = Yj(1:D,:);
-plot(Yj)
+% plot(Yj)
+%print('odp_skok.png','-dpng','-r400')
+
+%% Macierze do DMC
 
 %Macierz MP
 MP=zeros(N,D-1);
@@ -84,16 +85,23 @@ K = ((M'*M + lamb * eye(Nu))^(-1))* M';
 DUp = zeros(D-1, 1);
 Y = zeros(N,1);
 
+%% Obiekt star
+
 %warunki_początkowe
-kp = 300/T + 2;
-ks = max(19,D+7); %chwila skoku wartosci zadania
+kp = D/T + 2;
+ks = max(19,D+100); %chwila skoku wartosci zadania
 kk = t_sym/T;
 v1(1:kp) = v1_0;
 v2(1:kp) = v2_0;
+h2(1:kp) = h2_0;
+h1(1:kp) = h1_0;
 F1in(1:1000/T) = F1;
-F1in(1000/T:kk) = F1+2;
-FD(1:T:t_sym/T) = FD;
+F1in(1000/T:kk) = F1;
+FD = 15;
+FDc(1:T:t_sym/T) = FD;
 
+%Skok wartosci zadanej:
+yzad(1:ks)=38.44; yzad(ks:kk)=39;
 
 %główne wykonanie programu
 for k=kp:kk
@@ -102,9 +110,10 @@ for k=kp:kk
         Y_zad(n,1) = yzad(k);
     end
     %symulacja obiektu
-    v1(k) = v1(k-1) + T*(F1in(k-1-(tau/T)) + FD(k-1) - ap1*sqrt(v1(k-1)/A1));
-    v2(k) = v2(k-1) + T*(ap1*sqrt(v1(k-1)/A1) - ap2*(sqrt(sqrt(v2(k-1)/C2)))); 
-    h2(k) = sqrt(v2(k)/C2);
+    v1(k) = v1(k-1) + T*(F1in(k-1-(tau/T)) - F1 + FDc(k-1) - FD - (ap1/(2*(sqrt(h1_0))))*(h1(k-1)-h1_0));
+    v2(k) = v2(k-1) + T*((ap1/(2*(sqrt(h1_0))))*(h1(k-1)-h1_0) - (ap2/(2*(sqrt(h2_0))))*(h2(k-1)-h2_0)); 
+    h2(k) = h2_0 + 1/(2*sqrt(C2*v2_0))*(v2(k) - v2_0);
+    h1(k) = v1(k)/A1;
     %stała trajektoria referencyjna
     for n=1:N
         Y(n) = h2(k);
@@ -116,16 +125,14 @@ for k=kp:kk
     Yo = MP*DUp+Y;
     DU = K*(Y_zad - Yo);
     F1in(k)=F1in(k-1)+DU(1);   
-    wejscie_F1in(k)=F1in(k);
-    wyjscie_h2(k)=h2(k); 
 end
 
 
 iteracja = 0:1:kk-1;
 %Plot wyjście
 figure;
-stairs(iteracja, wyjscie_h2)
+stairs(iteracja, h2)
 hold on;
-stairs(iteracja, yzad);
+stairs(iteracja, yzad,"--");
 hold off;
 xlabel('k'); ylabel("y");

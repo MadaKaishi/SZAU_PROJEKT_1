@@ -1,5 +1,4 @@
 function dv = stan_ciagly(t,v,F1_ust,FD,A1,C2,ap1,ap2,tau)
-     
     if t>= tau
         F1 = F1_ust;
     else
