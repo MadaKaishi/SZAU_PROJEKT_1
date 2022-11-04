@@ -1,15 +1,13 @@
 clear; clc;
 
+file = load("Odp_skok\odp_skok.mat");
+s = file.s;
+
 %Parametry regulatora
-Nu = 2;
-N = 8;
+Nu = 5;
+N = 150;
 D = 1500;
-lamb = 100;
-
-%% Wymierzanie skoku jednostkowego
-
-%skok wartosci F1
-dF1 = 1;
+lamb = 750;
 
 %Parametry obiektu
 A1 = 505;
@@ -31,33 +29,19 @@ v1_0 = h1_0 * A1;
 t_sym = 15000; %czas symulacji
 T = 1; %krok
 
-%warunki_początkowe
-kp = 120/T + 2;
-ks = max(19,D+7); %chwila skoku wartosci zadania
-kk = t_sym/T;
-v1(1:kp) = v1_0;
-v2(1:kp) = v2_0;
-F1in(1:T:t_sym/T) = F1;
-FDc(1:T:t_sym/T) = FD;
 
-
-%Symulacja obiektu
-for k = kp:t_sym/T
-    F1in(k) = F1+dF1;
-    v1(k) = v1(k-1) + T*(F1in(k-1-(tau/T)) + FDc(k-1) - ap1*sqrt(v1(k-1)/A1));
-    v2(k) = v2(k-1) + T*(ap1*sqrt(v1(k-1)/A1) - ap2*(nthroot(v2(k-1)/C2,4)));  
-end
-%Obliczanie Wysokości na podstawie objętości
-h2(:,1) = sqrt(v2 /C2);
-
-%Skok jednostkowy
-Yj = h2 - min(h2);
-Yj = Yj/dF1;
-s = Yj(1:D,:);
-% plot(Yj)
-%print('odp_skok.png','-dpng','-r400')
 
 %% Macierze do DMC
+
+%Wyznaczanie macierzy M
+M=zeros(N,Nu);
+for i=1:N
+   for j=1:Nu
+      if (i>=j)
+         M(i,j)=s(i-j+1);
+      end
+   end
+end
 
 %Macierz MP
 MP=zeros(N,D-1);
@@ -71,15 +55,7 @@ for i=1:N
    end
 end
 
-%Wyznaczanie macierzy M
-M=zeros(N,Nu);
-for i=1:N
-   for j=1:Nu
-      if (i>=j)
-         M(i,j)=s(i-j+1);
-      end
-   end
-end
+
 
 K = ((M'*M + lamb * eye(Nu))^(-1))* M';
 DUp = zeros(D-1, 1);
@@ -140,11 +116,11 @@ stairs(iteracja, yzad,"--");
 hold off;
 xlabel('k'); ylabel("h");
 legend("h_2","h_2_z_a_d")
-print('DMC_reg.png','-dpng','-r400')
+% print('DMC_reg.png','-dpng','-r400')
 
 %Plot sterowanie
 figure;
 stairs(iteracja, F1in)
 legend("F_1_i_n")
 xlabel('k'); ylabel("F_1_i_n");
-print('DMC_ster.png','-dpng','-r400')
+% print('DMC_ster.png','-dpng','-r400')
