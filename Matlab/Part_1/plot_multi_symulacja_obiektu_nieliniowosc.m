@@ -42,4 +42,4 @@ for i=1:5
     lgd{i} = strcat('F_1= ',num2str(15+21*i)) ;
 end
 legend(lgd,Location="northoutside",Orientation="horizontal")
-print('h2_niel.png','-dpng','-r400')
+% print('h2_niel.png','-dpng','-r400')
