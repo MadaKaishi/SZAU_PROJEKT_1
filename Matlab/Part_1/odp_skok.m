@@ -51,5 +51,10 @@ Yj = h2 - h2(1);
 Yj = Yj/dF1;
 s = Yj(:,1:D);
 plot(Yj)
+title("Odpowiedz skokowa")
+ylabel("h_2")
+xlabel("k")
+set(get(gca,'ylabel'),'rotation',0)
+exportgraphics(gca,'odp_skok_lin.pdf')
 
-save("Odp_skok\odp_skok.mat", "s");
+% save("Odp_skok\odp_skok.mat", "s");

@@ -63,4 +63,4 @@ end
 xlabel("k"); ylabel("h_2");
 title("Porownanie obiektów dyskretnych")
 legend("Obiekt nieliniowy","Obiekt zlinearyzowany","Location","northoutside")
-%print('h1_h2_niel.png','-dpng','-r400')
+print('porow_2_obiekt.png','-dpng','-r400')

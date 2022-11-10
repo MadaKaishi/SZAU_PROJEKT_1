@@ -74,13 +74,14 @@ h1(1:kp) = h1_0;
 F1in(1:1000/T) = F1;
 F1in(1000/T:kk) = F1;
 FD = 15;
-FDc(1:T:t_sym/T) = FD;
+FDc(1:kp) = FD;
+FDc(kp:5000) = 30;
+FDc(5000:10000) = 15;
+FDc(10000:15000) = 7.5;
+
 
 %Skok wartosci zadanej:
-yzad(1:ks)=38.44; 
-yzad(ks:5000)=50;
-yzad(5000:10000)=30;
-yzad(10000:15000)=40;
+yzad(1:kk)=38.44; 
 
 error = 0;
 %główne wykonanie programu
@@ -114,17 +115,17 @@ iteracja = 0:1:kk-1;
 figure;
 stairs(iteracja, h2)
 hold on;
-stairs(iteracja, yzad,"--");
+stairs(iteracja, FDc,"--");
 hold off;
 xlabel('k'); ylabel("h");
-legend("h_2","h_2_z_a_d")
-exportgraphics(gca,'DMC_zmiana_wart.pdf')
+legend("h_2","FDc")
+exportgraphics(gca,'DMC_zmiana_zakl_wart.pdf')
 
 %Plot sterowanie
 figure;
 stairs(iteracja, F1in)
 legend("F_1_i_n")
 xlabel('k'); ylabel("F_1_i_n");
-exportgraphics(gca,'DMC_zmiana_ster.pdf')
+exportgraphics(gca,'DMC_zmiana_zakl_ster.pdf')
 
 display(error)
