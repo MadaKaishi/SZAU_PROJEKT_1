@@ -110,22 +110,29 @@ for k=kp:kk
 end
 
 
-iteracja = 0:1:kk-1;
 %Plot wyjście
-figure;
-stairs(iteracja, h2)
-hold on;
-stairs(iteracja, FDc,"--");
-hold off;
-xlabel('k'); ylabel("h");
-legend("h_2","FDc")
-exportgraphics(gca,'DMC_zmiana_zakl_wart.pdf')
+f = figure;
+subplot(3,1,1)
+stairs(1:kk,h2)
+xlabel("k")
+ylabel("h_2")
+title("h_2")
+ylim([25, 50])
 
-%Plot sterowanie
-figure;
-stairs(iteracja, F1in)
-legend("F_1_i_n")
-xlabel('k'); ylabel("F_1_i_n");
-exportgraphics(gca,'DMC_zmiana_zakl_ster.pdf')
+subplot(3,1,2)
+stairs(1:kk,FDc)
+xlabel("k")
+ylabel("Fd")
+title("Fd")
+ylim([0, 32])
+exportgraphics(f,'odp_na_zmiane_zakl.pdf')
 
+subplot(3,1,3)
+stairs(1:kk,F1in)
+xlabel("k")
+ylabel("F_1_i_n")
+title("F_1_i_n")
+ylim([60, 90])
+
+exportgraphics(f,'odp_na_zmiane_zakl.pdf')
 display(error)
