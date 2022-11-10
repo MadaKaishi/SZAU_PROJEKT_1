@@ -7,7 +7,7 @@ s = file.s;
 Nu = 5;
 N = 150;
 D = 1500;
-lamb = 750;
+lamb = 15;
 
 %Parametry obiektu
 A1 = 505;
