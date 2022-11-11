@@ -32,8 +32,8 @@ h1(1:kp) = h1_0;
 h2(1:kp) = h2_0;
 F1in(1:T:t_sym/T) = F1;
 FDc(1:T:t_sym/T) = FD;
-figure;
 hold on;
+figure;
 for P = 36:21:120
     h2(1:kp) = h2_0;
     h1(1:kp) = h1_0;

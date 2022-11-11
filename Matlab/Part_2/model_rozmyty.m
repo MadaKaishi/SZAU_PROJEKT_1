@@ -81,6 +81,11 @@ for P = 36:21:120
             F1in(k) = P;
         end
 
+        % Model nieliniowy
+
+        % Model liniowy
+
+
         for i = 1:il_fun
             %Rownania modelu
        
@@ -108,6 +113,5 @@ for P = 36:21:120
     end
     plot(h2(il_fun+1,:))
     legend()
-    clear h1 h2 v1 v2;
 end
 
