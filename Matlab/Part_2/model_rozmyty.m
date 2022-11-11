@@ -4,8 +4,8 @@ clear all;
 %% Parametry programu
 
 draw = true;
-sa = true;
-il_fun = 5;
+sa = false;
+il_fun = 2;
 
 %% Definicja parametrów
 
@@ -34,7 +34,7 @@ h_min = 0;
 h_max = 90;
 h = (h_min:1:h_max)';
 
-nach = 2; %nachylenie funkcji 
+nach = 3; %nachylenie funkcji 
 
 d = (h_max-h_min)/il_fun; %szerokości funkcji przynależnośći
 c = h_min+d:d:h_max-d; %punkty przegięcia
@@ -46,9 +46,10 @@ hr0(il_fun) = min((h_max+c(il_fun-1))/2+1, h_max);
     if il_fun > 2
         hr0(2:il_fun-1) = (c(2:il_fun-1)+c(1:il_fun-2))./2;
     end
-
 m = (ap2/ap1)^2;
-
+hr01 = hr0.*m;
+vr2 = hr0.^2 * C2;
+Fr0 = ap1*hr01.^0.5-FD0;
 
 %% Warunki początkowe
 
@@ -64,42 +65,49 @@ kp = tau/T + 2;
 kk = t_sym/T;
 
 
-for P = 78
-    h1 = h1_0 * ones(il_fun+1,kp);
-    h2 = h2_0 * ones(il_fun+1,kp);
-    v1 =  A1 * h1_0 * ones(il_fun,kp);
-    v2 =  C2 * h2_0 * h2_0 * ones(il_fun,kp);
+for P = 36:21:120
+
+    h1 = h1_0 * ones(il_fun+1,kk);
+    h2 = h2_0 * ones(il_fun+1,kk);
+    v1 = h1_0 * A1 * ones(il_fun+1,kk);
+    v2 = h2_0^2 * C2 * ones(il_fun+1,kk);
+
     F1in(1:kk) = F1;
     FDc(1:kk) = FD;
+    
     for k = kp:kk
+        
         if k/T > 180
             F1in(k) = P;
         end
+
         for i = 1:il_fun
             %Rownania modelu
+       
+            v1(i,k) = v1(il_fun+1,k-1) + T*(F1in(k-1-(tau/T)) - Fr0(i) + FDc(k-1) - FD0 - (ap1/(2*(sqrt(hr01(i)))))*(h1(il_fun+1,k-1)-hr01(i)));
+            v2(i,k) = v2(il_fun+1,k-1) + T*((ap1/(2*(sqrt(hr01(i)))))*(h1(il_fun+1,k-1)-hr01(i)) - (ap2/(2*(sqrt(hr0(i)))))*(h2(il_fun+1,k-1)-hr0(i))); 
+            h2(i,k) = hr0(i) + (v2(i,k) - vr2(i))*1/(2*sqrt(C2*vr2(i)));
+            h1(i,k) = v1(i,k)/A1;
 
-              v1(i,k) = v1(k-1) + T*(F1in(k-1-(tau/T)) - F10 + FDc(k-1) - FD0 - (ap1/(2*(sqrt(hr0(i)*m)))*(h1(k-1)-hr0(i)*m)));
-              v2(i,k) = v2(k-1) + T*((ap1/(2*(sqrt(hr0(i)*m))))*(h1(k-1)-hr0(i)*m) - (ap2/(2*(sqrt(hr0(i)))))*(h2(k-1)-hr0(i))); 
-              h2(i,k) = hr0(i) + 1/(2*sqrt(C2*C2*hr0(i)^2))*(v2(k) - C2*hr0(i)^2);
-              h1(i,k) = v1(k)/A1;
- 
-%             h1(i,k) = h1(k-1) + T*(F1in(k-1-(tau/T)) + FDc(k-1) - ap1 * (sqrt((hr0(i)*m)) + (h1(k-1) - hr0(i)*m)/(2*sqrt(hr0(i)*m))))/A1;
-%             h2(i,k) = h2(k-1) + T*((ap1 * sqrt((hr0(i)*m)) - ap2 * sqrt((hr0(i))))/(2*C2*hr0(i))   +    ap1*(h1(k-1) - (hr0(i)*m))/(4*C2*(sqrt((hr0(i)*m))))    -  ap2*(h2(k-1) - hr0(i))/(4*C2*(nthroot((hr0(i) * hr0(i)),3))));
-            
             %Liczenie funkcji przynaleznosci
             if i == 1
-                w(i) = trapmf(1,[0 0 c(1)-nach/2 c(1)+ nach/2]);
+                w(i) = trapmf(h2(i,k),[0 0 c(1)-nach/2 c(1)+ nach/2]);
             elseif i == il_fun
-                w(i) = trapmf(1,[c(il_fun-1)-nach/2 c(il_fun-1)+nach/2 h_max h_max]);
+                w(i) = trapmf(h2(i,k),[c(il_fun-1)-nach/2 c(il_fun-1)+nach/2 h_max h_max]);
             else
-                w(i) = trapmf(1,[c(i-1)-nach/2 c(i-1)+ nach/2 c(i)-nach/2 c(i)+ nach/2]);
+                w(i) = trapmf(h2(i,k),[c(i-1)-nach/2 c(i-1)+ nach/2 c(i)-nach/2 c(i)+ nach/2]);
             end
         end
         %Wyliczanie wyjscia modelu
-        h2(il_fun+1,k) = w*h2(1:il_fun, k)/sum(w);
-        h1(il_fun+1,k) = w*h1(1:il_fun, k)/sum(w);
+
+        h2(il_fun+1,k) = w * h2(1:il_fun, k)/sum(w);
+        h1(il_fun+1,k) = w * h1(1:il_fun, k)/sum(w);
+        v2(il_fun+1,k) = w * v2(1:il_fun, k)/sum(w);
+        v1(il_fun+1,k) = w * v1(1:il_fun, k)/sum(w);
+
     end
+    plot(h2(il_fun+1,:))
+    legend()
+    clear h1 h2 v1 v2;
 end
 
-plot(h2(3,:))
-plot(h1(3,:))
