@@ -5,7 +5,7 @@ clear all;
 
 draw = true;
 sa = true;
-il_fun = 2;
+il_fun = 5;
 
 %% Definicja parametrów
 
@@ -34,7 +34,7 @@ h_min = 0;
 h_max = 90;
 h = (h_min:1:h_max)';
 
-nach = 3; %nachylenie funkcji 
+nach = 2; %nachylenie funkcji 
 
 d = (h_max-h_min)/il_fun; %szerokości funkcji przynależnośći
 c = h_min+d:d:h_max-d; %punkty przegięcia
@@ -67,6 +67,8 @@ kk = t_sym/T;
 for P = 78
     h1 = h1_0 * ones(il_fun+1,kp);
     h2 = h2_0 * ones(il_fun+1,kp);
+    v1 =  A1 * h1_0 * ones(il_fun,kp);
+    v2 =  C2 * h2_0 * h2_0 * ones(il_fun,kp);
     F1in(1:kk) = F1;
     FDc(1:kk) = FD;
     for k = kp:kk
@@ -75,8 +77,14 @@ for P = 78
         end
         for i = 1:il_fun
             %Rownania modelu
-            h1(i,k) = h1(k-1) + T*(F1in(k-1-(tau/T)) + FDc(k-1) - ap1 * (sqrt((hr0(i)*m)) + (h1(k-1) - hr0(i)*m)/(2*sqrt(hr0(i)*m))))/A1;
-            h2(i,k) = h2(k-1) + T*((ap1 * sqrt((hr0(i)*m)) - ap2 * sqrt((hr0(i))))/(2*C2*hr0(i))   +    ap1*(h1(k-1) - (hr0(i)*m))/(4*C2*(sqrt((hr0(i)*m))))    -  ap2*(h2(k-1) - hr0(i))/(4*C2*(nthroot((hr0(i) * hr0(i)),3))));
+
+              v1(i,k) = v1(k-1) + T*(F1in(k-1-(tau/T)) - F10 + FDc(k-1) - FD0 - (ap1/(2*(sqrt(hr0(i)*m)))*(h1(k-1)-hr0(i)*m)));
+              v2(i,k) = v2(k-1) + T*((ap1/(2*(sqrt(hr0(i)*m))))*(h1(k-1)-hr0(i)*m) - (ap2/(2*(sqrt(hr0(i)))))*(h2(k-1)-hr0(i))); 
+              h2(i,k) = hr0(i) + 1/(2*sqrt(C2*C2*hr0(i)^2))*(v2(k) - C2*hr0(i)^2);
+              h1(i,k) = v1(k)/A1;
+ 
+%             h1(i,k) = h1(k-1) + T*(F1in(k-1-(tau/T)) + FDc(k-1) - ap1 * (sqrt((hr0(i)*m)) + (h1(k-1) - hr0(i)*m)/(2*sqrt(hr0(i)*m))))/A1;
+%             h2(i,k) = h2(k-1) + T*((ap1 * sqrt((hr0(i)*m)) - ap2 * sqrt((hr0(i))))/(2*C2*hr0(i))   +    ap1*(h1(k-1) - (hr0(i)*m))/(4*C2*(sqrt((hr0(i)*m))))    -  ap2*(h2(k-1) - hr0(i))/(4*C2*(nthroot((hr0(i) * hr0(i)),3))));
             
             %Liczenie funkcji przynaleznosci
             if i == 1
