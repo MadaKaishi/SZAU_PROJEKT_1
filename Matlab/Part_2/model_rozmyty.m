@@ -74,8 +74,11 @@ for P = 78
             F1in(k) = P;
         end
         for i = 1:il_fun
-            h1(i,k) = h1(k-1) + T*(F1in(k-1-(tau/T)) + FDc(k-1) - ap1 * (sqrt((hr0(i)*m)) + (h1(k-1) - h1_0)/(2*sqrt(hr0(i)*m))))/A1;
-            h2(i,k) = h2(k-1) + T*((ap1 * sqrt((hr0(i)*m)) - ap2 * sqrt((hr0(i))))/(2*C2*h2_0)   +    ap1*(h1(k-1) - (hr0(i)*m))/(4*C2*(sqrt((hr0(i)*m))))    -  ap2*(h2(k-1) - hr0(i))/(4*C2*(nthroot((hr0(i) * hr0(i)),3))));
+            %Rownania modelu
+            h1(i,k) = h1(k-1) + T*(F1in(k-1-(tau/T)) + FDc(k-1) - ap1 * (sqrt((hr0(i)*m)) + (h1(k-1) - hr0(i)*m)/(2*sqrt(hr0(i)*m))))/A1;
+            h2(i,k) = h2(k-1) + T*((ap1 * sqrt((hr0(i)*m)) - ap2 * sqrt((hr0(i))))/(2*C2*hr0(i))   +    ap1*(h1(k-1) - (hr0(i)*m))/(4*C2*(sqrt((hr0(i)*m))))    -  ap2*(h2(k-1) - hr0(i))/(4*C2*(nthroot((hr0(i) * hr0(i)),3))));
+            
+            %Liczenie funkcji przynaleznosci
             if i == 1
                 w(i) = trapmf(1,[0 0 c(1)-nach/2 c(1)+ nach/2]);
             elseif i == il_fun
@@ -84,6 +87,7 @@ for P = 78
                 w(i) = trapmf(1,[c(i-1)-nach/2 c(i-1)+ nach/2 c(i)-nach/2 c(i)+ nach/2]);
             end
         end
+        %Wyliczanie wyjscia modelu
         h2(il_fun+1,k) = w*h2(1:il_fun, k)/sum(w);
         h1(il_fun+1,k) = w*h1(1:il_fun, k)/sum(w);
     end
