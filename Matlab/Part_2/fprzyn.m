@@ -46,3 +46,5 @@ if draw
     end
 end
 
+zmienna = trapmf(h,[0 0 c(1)-nach/2 c(1)+ nach/2])
+
