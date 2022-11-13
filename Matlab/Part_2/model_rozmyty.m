@@ -5,7 +5,8 @@ clear all;
 
 draw = true;
 sa = false;
-il_fun = 2;
+il_fun = 20;
+set(0,'DefaultStairLineWidth',1);
 
 %% Definicja parametrów
 
@@ -14,11 +15,12 @@ A1 = 505;
 C2 = 0.65;
 ap1 = 23; %alfa_1
 ap2 = 15; %alfa_2
-
+ 
 %Punkt pracy
 tau = 120;
 h2_0 = 38.44;
 h1_0 = 16.34;
+v2_0 = h2_0^2 * C2;
 F1 = 78;
 FD = 15;
 
@@ -55,7 +57,7 @@ Fr0 = ap1*hr01.^0.5-FD0;
 
 if draw
     figure
-    title('Przebiegi dla skoku sterowania w chwili 180.')
+    title("Porownanie obiektów")
     xlabel('k')
     ylabel('h_2')
     hold on
@@ -67,10 +69,10 @@ kk = t_sym/T;
 
 for P = 36:21:120
 
-    h1 = h1_0 * ones(il_fun+1,kk);
-    h2 = h2_0 * ones(il_fun+1,kk);
-    v1 = h1_0 * A1 * ones(il_fun+1,kk);
-    v2 = h2_0^2 * C2 * ones(il_fun+1,kk);
+    h1 = h1_0 * ones(il_fun+3,kk);
+    h2 = h2_0 * ones(il_fun+3,kk);
+    v1 = h1_0 * A1 * ones(il_fun+3,kk);
+    v2 = h2_0^2 * C2 * ones(il_fun+3,kk);
 
     F1in(1:kk) = F1;
     FDc(1:kk) = FD;
@@ -82,9 +84,16 @@ for P = 36:21:120
         end
 
         % Model nieliniowy
+        v1(il_fun+2,k) = v1(il_fun+2,k-1) + T*(F1in(k-1-(tau/T)) + FDc(k-1) - ap1*(sqrt(h1(il_fun+2,k-1))));
+        v2(il_fun+2,k) = v2(il_fun+2,k-1) + T*(ap1*sqrt(h1(il_fun+2,k-1)) - ap2*(sqrt(h2(il_fun+2,k-1)))); 
+        h1(il_fun+2,k) = v1(il_fun+2,k)/A1;
+        h2(il_fun+2,k) = sqrt(v2(il_fun+2,k)/C2);
 
         % Model liniowy
-
+        v1(il_fun+3,k) = v1(il_fun+3,k-1) + T*(F1in(k-1-(tau/T)) - F10 + FDc(k-1) - FD0 - (ap1/(2*(sqrt(h1_0))))*(h1(il_fun+3,k-1)-h1_0));
+        v2(il_fun+3,k) = v2(il_fun+3,k-1) + T*((ap1/(2*(sqrt(h1_0))))*(h1(il_fun+3,k-1)-h1_0) - (ap2/(2*(sqrt(h2_0))))*(h2(il_fun+3,k-1)-h2_0)); 
+        h2(il_fun+3,k) = h2_0 + 1/(2*sqrt(C2*v2_0))*(v2(il_fun+3,k) - v2_0);
+        h1(il_fun+3,k) = v1(il_fun+3,k)/A1;
 
         for i = 1:il_fun
             %Rownania modelu
@@ -111,7 +120,16 @@ for P = 36:21:120
         v1(il_fun+1,k) = w * v1(1:il_fun, k)/sum(w);
 
     end
-    plot(h2(il_fun+1,:))
-    legend()
-end
 
+
+    stairs((1:k),h2(il_fun+2,:),"--r")
+    hold on
+    stairs((1:k),h2(il_fun+3,:),"--g")
+    stairs((1:k),h2(il_fun+1,:),"b")
+    legend("Model nieliniowy", "Model zlinearyzowany", "Model rozmyty","Location","northoutside","Orientation","horizontal")
+
+    clear v1 v2 h1 h2
+end
+if sa
+    print(sprintf("Porown_rozm_mod_il_%i",il_fun),'-dpng','-r400');
+end

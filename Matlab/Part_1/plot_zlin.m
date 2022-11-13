@@ -24,7 +24,6 @@ funkcja = @(t,h)linearyzacja(t,h,F1,FD,A1,C2,ap1,ap2,tau,h1_0,h2_0);
 [t,h] = ode45(funkcja,[0, 5000],[h1_0;h2_0]);
 
 %Obliczanie Wysokości na podstawie objętości
-h
 
 %Plot h/t
 set(0,'defaultLineLineWidth',1);

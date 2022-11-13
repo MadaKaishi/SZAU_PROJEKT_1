@@ -57,6 +57,7 @@ for P = 36:21:120
     end
     display(h2)
     plot((1:k),h2);
+    hold on
     clear h2
     clear h1
 end
