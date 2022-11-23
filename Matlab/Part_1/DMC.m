@@ -4,10 +4,10 @@ file = load("Odp_skok\odp_skok.mat");
 s = file.s;
 
 %Parametry regulatora
-Nu = 20;
-N = 500;
+Nu = 3;
+N = 1500;
 D = 1500;
-lamb = 8;
+lamb = 15;
 
 %Parametry obiektu
 A1 = 505;
@@ -105,9 +105,8 @@ for k=kp:kk
     Yo = MP*DUp+Y;
     DU = K*(Y_zad - Yo);
     F1in(k)=F1in(k-1)+DU(1);  
-    error = error + norm((yzad(k) - h2(k)));
+    error = error + norm((yzad(k) - h2(k)))^2;
 end
-
 
 iteracja = 0:1:kk-1;
 %Plot wyjście

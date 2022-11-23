@@ -5,7 +5,7 @@ s = file.s;
 
 %Parametry regulatora
 Nu = 3;
-N = 150;
+N = 1500;
 D = 1500;
 lamb = 15;
 
@@ -106,7 +106,7 @@ for k=kp:kk
     Yo = MP*DUp+Y;
     DU = K*(Y_zad - Yo);
     F1in(k)=F1in(k-1)+DU(1);  
-    error = error + norm((yzad(k) - h2(k)));
+    error = error + norm((yzad(k) - h2(k)))^2;
 end
 
 
@@ -125,7 +125,7 @@ xlabel("k")
 ylabel("Fd")
 title("Fd")
 ylim([0, 32])
-exportgraphics(f,'odp_na_zmiane_zakl.pdf')
+% exportgraphics(f,'odp_na_zmiane_zakl.pdf')
 
 subplot(3,1,3)
 stairs(1:kk,F1in)
@@ -134,5 +134,5 @@ ylabel("F_1_i_n")
 title("F_1_i_n")
 ylim([60, 90])
 
-exportgraphics(f,'odp_na_zmiane_zakl.pdf')
+% exportgraphics(f,'odp_na_zmiane_zakl.pdf')
 display(error)
