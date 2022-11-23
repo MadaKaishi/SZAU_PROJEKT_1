@@ -4,10 +4,10 @@ file = load("Odp_skok\odp_skok.mat");
 s = file.s;
 
 %Parametry regulatora
-Nu = 3;
-N = 150;
+Nu = 20;
+N = 500;
 D = 1500;
-lamb = 15;
+lamb = 8;
 
 %Parametry obiektu
 A1 = 505;
@@ -118,13 +118,13 @@ stairs(iteracja, yzad,"--");
 hold off;
 xlabel('k'); ylabel("h");
 legend("h_2","h_2_z_a_d")
-exportgraphics(gca,'DMC_zmiana_wart.pdf')
+% exportgraphics(gca,'DMC_zmiana_wart.pdf')
 
 %Plot sterowanie
 figure;
 stairs(iteracja, F1in)
 legend("F_1_i_n")
 xlabel('k'); ylabel("F_1_i_n");
-exportgraphics(gca,'DMC_zmiana_ster.pdf')
+% exportgraphics(gca,'DMC_zmiana_ster.pdf')
 
 display(error)
