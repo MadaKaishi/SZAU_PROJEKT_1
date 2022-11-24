@@ -5,13 +5,13 @@ sa = false;
 draw_f_przyn = true;
 
 set(0,'DefaultStairLineWidth',1);
-DUmax = 1;
-Umax = 120;
+DUmax = 10;
+Umax = 150;
 Umin = 0;
 
 %% Parametry regulatora
-Nu = 25;
-N = 700;
+Nu = 4;
+N = 1200;
 D = 1500;
 lamb = 25;
 
@@ -101,7 +101,6 @@ end
 
 for r = 1:il_fun
     s = generate_step(hr0(r),false);
-        display(hr0(r))
         M=zeros(N,Nu);
         for i=1:N
            for j=1:Nu
@@ -146,9 +145,10 @@ FDc(1:T:t_sym/T) = FD;
 %Skok wartosci zadanej:
 yzad(1:ks)=38.44; 
 yzad(ks:5000)=30;
-yzad(5000:10000)=40;
-yzad(10000:15000)=50;
+yzad(5000:10000)=80;
+yzad(10000:15000)=20;
 yzad(15000:20000)=40;
+
 
 error = 0;
 w = zeros(1,il_fun);

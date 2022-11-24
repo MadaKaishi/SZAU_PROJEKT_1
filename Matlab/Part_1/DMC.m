@@ -4,10 +4,10 @@ file = load("Odp_skok\odp_skok.mat");
 s = file.s;
 
 %Parametry regulatora
-Nu = 3;
-N = 1100;
+Nu = 4;
+N = 1200;
 D = 1500;
-lamb = 10;
+lamb = 25;
 
 %Parametry obiektu
 A1 = 505;
@@ -81,8 +81,8 @@ FDc(1:T:t_sym/T) = FD;
 %Skok wartosci zadanej:
 yzad(1:ks)=38.44; 
 yzad(ks:5000)=30;
-yzad(5000:10000)=40;
-yzad(10000:15000)=50;
+yzad(5000:10000)=80;
+yzad(10000:15000)=20;
 yzad(15000:20000)=40;
 
 error = 0;
