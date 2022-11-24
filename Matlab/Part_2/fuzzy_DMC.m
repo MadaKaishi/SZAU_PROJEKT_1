@@ -10,7 +10,7 @@ Umax = 120;
 Umin = 0;
 
 %% Parametry regulatora
-Nu = 3;
+Nu = 25;
 N = 700;
 D = 1500;
 lamb = 25;
