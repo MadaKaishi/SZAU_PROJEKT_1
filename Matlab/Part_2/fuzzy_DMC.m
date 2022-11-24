@@ -61,13 +61,9 @@ c = h_min+d:d:h_max-d; %punkty przegięcia
 hr0 = ones(1,il_fun);
 hr0(1) = d/2;
 hr0(il_fun) = min((h_max+c(il_fun-1))/2+1, h_max);
-    if il_fun > 2
-        hr0(2:il_fun-1) = (c(2:il_fun-1)+c(1:il_fun-2))./2;
-    end
-m = (ap2/ap1)^2;
-hr01 = hr0.*m;
-vr2 = hr0.^2 * C2;
-Fr0 = ap1*hr01.^0.5-FD0;
+if il_fun > 2
+    hr0(2:il_fun-1) = (c(2:il_fun-1)+c(1:il_fun-2))./2;
+end
 
 
 ku = zeros(il_fun,D-1);
@@ -101,7 +97,8 @@ end
 
 for r = 1:il_fun
     s = generate_step(hr0(r),false);
-        M=zeros(N,Nu);
+        
+    M=zeros(N,Nu);
         for i=1:N
            for j=1:Nu
               if (i>=j)
@@ -110,8 +107,8 @@ for r = 1:il_fun
            end
         end
         
-        %Macierz MP
-        MP=zeros(N,D-1);
+
+    MP=zeros(N,D-1);
         for i=1:N
            for j=1:D-1
               if i+j<=D
@@ -121,10 +118,10 @@ for r = 1:il_fun
               end      
            end
         end
-        K = ((M'*M + lamb(r) * eye(Nu))^(-1))* M';
     
-        ku(r,:) = K(1,:)*MP;
-        ke(r) = sum(K(1,:));
+    K = ((M'*M + lamb(r) * eye(Nu))^(-1))* M';
+    ku(r,:) = K(1,:)*MP;
+    ke(r) = sum(K(1,:));
 end
 
 %% Symulacja obiektu
@@ -161,8 +158,8 @@ err_sum = 0;
 %główne wykonanie programu
 for k=kp:kk
     for n=1:N
-    %yzad dla horyzontu predykcji
-        Y_zad(n,1) = yzad(k);
+
+
     end
     %symulacja obiektu
     v1(k) = v1(k-1) + T*(F1in(k-1-(tau/T)) + FDc(k-1) - ap1*sqrt(h1(k-1)));
@@ -174,11 +171,8 @@ for k=kp:kk
     err_cur = yzad(k) - h2(k);
     err_sum = err_sum + norm((yzad(k) - h2(k)))^2;
 
-    %stała trajektoria referencyjna
-    for n=1:N
-        Y(n) = h2(k);
-    end
-    
+
+    %Liczenie wartości przyrostu sterowania
     for i = 1:il_fun
 
         Du(i) = ke(i)*err_cur-ku(i,:)*DUp';
@@ -197,6 +191,7 @@ for k=kp:kk
 
     %Ogranieczenia przyrostu sterowania
     DUfin = w * Du / sum(w);
+    
     if DUfin > DUmax
         DUfin = DUmax;
     elseif DUfin < -DUmax
@@ -208,7 +203,7 @@ for k=kp:kk
     end
     DUp(1) = DUfin;
 
-    F1in(k) = F1in(k-1) + DUfin;
+    F1in(k) = F1in(k-1) + DUp(1);
 
     %Ograniczenia sterowania
     if F1in(k) > Umax
