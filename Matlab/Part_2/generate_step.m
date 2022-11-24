@@ -40,7 +40,7 @@ F1in(1:T:t_sym/T) = Fr0;
 FDc(1:T:t_sym/T) = FD0;
 
 
-%Symulacja obiektu
+%Symulacja obiektu w punkcie pracy
 for k = kp:t_sym/T
     F1in(k) = Fr0+dF1;
         v1(k) = v1(k-1) + T*(F1in(k-1-(tau/T)) - Fr0 + FDc(k-1) - FD0 - (ap1/(2*(sqrt(h1_0))))*(h1(k-1)-h1_0));

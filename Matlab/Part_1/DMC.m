@@ -26,7 +26,7 @@ FD = 15;
 v2_0 = h2_0^2 * C2;
 v1_0 = h1_0 * A1;
 
-t_sym = 15000; %czas symulacji
+t_sym = 20000; %czas symulacji
 T = 1; %krok
 
 
@@ -78,9 +78,10 @@ FDc(1:T:t_sym/T) = FD;
 
 %Skok wartosci zadanej:
 yzad(1:ks)=38.44; 
-yzad(ks:5000)=50;
-yzad(5000:10000)=30;
-yzad(10000:15000)=40;
+yzad(ks:5000)=30;
+yzad(5000:10000)=40;
+yzad(10000:15000)=50;
+yzad(15000:20000)=40;
 
 error = 0;
 %główne wykonanie programu

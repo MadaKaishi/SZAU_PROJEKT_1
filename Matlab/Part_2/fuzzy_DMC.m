@@ -2,20 +2,21 @@ clear; clc;
 %% Parametry programu
 draw = true;
 sa = false;
-set(0,'DefaultStairLineWidth',1);
+draw_f_przyn = true;
 
-DUmax = 10;
+set(0,'DefaultStairLineWidth',1);
+DUmax = 1;
 Umax = 120;
 Umin = 0;
 
 %% Parametry regulatora
 Nu = 3;
-N = 900;
+N = 700;
 D = 1500;
 lamb = 25;
 
 %liczba regulatorów
-il_fun = 10;
+il_fun = 5;
 lamb = lamb*ones(1,il_fun);
 
 
@@ -42,13 +43,13 @@ FD0 = 15;
 v2_0 = h2_0^2 * C2;
 v1_0 = h1_0 * A1;
 
-t_sym = 15000; %czas symulacji
+t_sym = 20000; %czas symulacji
 T = 1; %krok
 
 
 %% Zmienne modelu rozmytego
-h_min = 20;
-h_max = 70;
+h_min = 0;
+h_max = 90;
 h = (h_min:1:h_max)';
 
 nach = 3; %nachylenie funkcji 
@@ -72,12 +73,35 @@ Fr0 = ap1*hr01.^0.5-FD0;
 ku = zeros(il_fun,D-1);
 ke = zeros(1,il_fun);
 
+%% Pokazanie funkcji przynależności
+
+if draw_f_przyn
+    figure
+    hold on
+    %Plotter funkcji przynaleznosci
+    for i = 1:il_fun
+        if i == 1
+            plot(trapmf(h_min:1:h_max,[0 0 c(1)-nach/2 c(1)+ nach/2]));
+        elseif i == il_fun
+            plot(trapmf(h_min:1:h_max,[c(il_fun-1)-nach/2 c(il_fun-1)+nach/2 h_max h_max]));
+        else
+            plot(trapmf(h_min:1:h_max,[c(i-1)-nach/2 c(i-1)+ nach/2 c(i)-nach/2 c(i)+ nach/2]));
+        end
+    end
+    xlim([0 90])
+    xlabel("h_2"); ylabel("Funkcja przynależności");
+    title(sprintf("Funkcja przynaleznosci dla %i zbiorów rozmytych",il_fun))
+    if sa
+        print(sprintf('funkcja_przynelznosci_%i.png',il_fun),'-dpng','-r400')
+    end
+end
+
 
 %% Liczenie poszczególnych regulatorów
 
 for r = 1:il_fun
     s = generate_step(hr0(r),false);
-
+        display(hr0(r))
         M=zeros(N,Nu);
         for i=1:N
            for j=1:Nu
@@ -121,9 +145,10 @@ FDc(1:T:t_sym/T) = FD;
 
 %Skok wartosci zadanej:
 yzad(1:ks)=38.44; 
-yzad(ks:5000)=50;
-yzad(5000:10000)=30;
-yzad(10000:15000)=40;
+yzad(ks:5000)=30;
+yzad(5000:10000)=40;
+yzad(10000:15000)=50;
+yzad(15000:20000)=40;
 
 error = 0;
 w = zeros(1,il_fun);
