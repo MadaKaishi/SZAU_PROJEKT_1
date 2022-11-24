@@ -129,8 +129,7 @@ v1(1:kp) = v1_0;
 v2(1:kp) = v2_0;
 h2(1:kp) = h2_0;
 h1(1:kp) = h1_0;
-F1in(1:1000/T) = F1;
-F1in(1000/T:kk) = F1;
+F1in(1:T:kp) = F1;
 FD = 15;
 FDc(1:T:t_sym/T) = FD;
 
@@ -201,11 +200,12 @@ for k=kp:kk
         DUp(i) = DUp(i-1);
     end
     DUp(1) = holder;
-    F1in(k) = F1in(k-1);
+    F1in(k) = F1in(k-1) + DUp(1);
 
     plot(h2, 'b')
     hold on
     plot(F1in,'g')
+    plot(yzad,"--r")
     drawnow;
 
 end
