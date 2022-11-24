@@ -5,9 +5,9 @@ s = file.s;
 
 %Parametry regulatora
 Nu = 3;
-N = 1500;
+N = 900;
 D = 1500;
-lamb = 15;
+lamb = 25;
 
 %Parametry obiektu
 A1 = 505;

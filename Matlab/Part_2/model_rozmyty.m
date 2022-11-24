@@ -53,7 +53,7 @@ hr01 = hr0.*m;
 vr2 = hr0.^2 * C2;
 Fr0 = ap1*hr01.^0.5-FD0;
 
-%% Warunki początkowe
+%% Symulacja
 
 if draw
     figure

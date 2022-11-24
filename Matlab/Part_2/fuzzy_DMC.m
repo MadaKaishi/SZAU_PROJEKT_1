@@ -1,59 +1,82 @@
-
-%% Nastawy regulatora
-D = 1500;
-DZ = 200;
-N = 125;
-Nu = 2;
-lambda = 15;
-a = 10;
-c = [8.5 17.5 24.5 33.5];
+clear; clc;
+%% Parametry programu
 draw = true;
+sa = false;
+set(0,'DefaultStairLineWidth',1);
 
-    % zmienne i macierze regulatora
-    D = min(D, 400);
-    DZ = min(DZ, 400);
-    N = min(min(N,D),DZ);
-    Nu = min(Nu, N);
+DUmax = 10;
+Umax = 120;
+Umin = 0;
 
-    il = 5;
-    lambda = lambda*ones(1,il);
-    ku = zeros(il,D-1);
-    kz = zeros(il,DZ);
-    ke = zeros(1,il);
-    ymin = 4.5;
-    ymax = 34.5;
-%     if length(a) == 0
-%         [a, c, hr0] = z2_modelroz(il, false);
-%     else
-        hr0(1) = (c(1)+ymin)/2-1;
-        hr0(il) = min((ymax+c(il-1))/2+1, ymax);
-        if il > 2
-            hr0(2:il-1) = (c(2:il-1)+c(1:il-2))./2;
-        end
+%% Parametry regulatora
+Nu = 3;
+N = 900;
+D = 1500;
+lamb = 25;
+
+%liczba regulatorów
+il_fun = 10;
+lamb = lamb*ones(1,il_fun);
+
+
+%% Parametry modelu i symulacji
+
+%Constants
+A1 = 505;
+C2 = 0.65;
+ap1 = 23; %alfa_1
+ap2 = 15; %alfa_2
+
+%Punkt pracy obiektu
+tau = 120;
+h2_0 = 38.44;
+h1_0 = 16.34;
+F1 = 78;
+FD = 15;
+
+%Podstawowe punkty linearyzacji
+F10 = 78;
+FD0 = 15;
+
+%Objetośc punktu pracy
+v2_0 = h2_0^2 * C2;
+v1_0 = h1_0 * A1;
+
+t_sym = 15000; %czas symulacji
+T = 1; %krok
+
+
+%% Zmienne modelu rozmytego
+h_min = 20;
+h_max = 70;
+h = (h_min:1:h_max)';
+
+nach = 3; %nachylenie funkcji 
+
+d = (h_max-h_min)/il_fun; %szerokości funkcji przynależnośći
+c = h_min+d:d:h_max-d; %punkty przegięcia
+
+%Wybranie punktu linearyzacji
+hr0 = ones(1,il_fun);
+hr0(1) = d/2;
+hr0(il_fun) = min((h_max+c(il_fun-1))/2+1, h_max);
+    if il_fun > 2
+        hr0(2:il_fun-1) = (c(2:il_fun-1)+c(1:il_fun-2))./2;
     end
-%     a = 10;
-%     c = [8.5000   17.5000   24.5000   33.5000];
-    
-    if draw
-        figure
-        hold on
-        for r = 1:il
-            if r == 1
-                plot(ymin:0.1:ymax,1-1./(1+exp(-a*([ymin:0.1:ymax]-c(1)))))
-            elseif r == il
-                plot(ymin:0.1:ymax,1./(1+exp(-a*([ymin:0.1:ymax]-c(il-1)))))
-            else
-                plot(ymin:0.1:ymax,1./(1+exp(-a*([ymin:0.1:ymax]-c(r-1))))-1./(1+exp(-a*([ymin:0.1:ymax]-c(r)))))
-            end
-        end
-        plot(hr0, ones(1,il), 'ko')
-        xlabel('h2')
-        ylabel('przynale¿noœæ')
-        title('Funkcje przynale¿noœci regulatorów lokalnych w regulacji rozmytej wzglêdem wartoœci wyjœcia')
-    end
-    
-    for r = 1:il
-        [s, z] = z1_step(hr0(r), false);
+m = (ap2/ap1)^2;
+hr01 = hr0.*m;
+vr2 = hr0.^2 * C2;
+Fr0 = ap1*hr01.^0.5-FD0;
+
+
+ku = zeros(il_fun,D-1);
+ke = zeros(1,il_fun);
+
+
+%% Liczenie poszczególnych regulatorów
+
+for r = 1:il_fun
+    s = generate_step(hr0(r),false);
 
         M=zeros(N,Nu);
         for i=1:N
@@ -63,7 +86,8 @@ draw = true;
               end
            end
         end
-
+        
+        %Macierz MP
         MP=zeros(N,D-1);
         for i=1:N
            for j=1:D-1
@@ -71,116 +95,124 @@ draw = true;
                  MP(i,j)=s(i+j)-s(j);
               else
                  MP(i,j)=s(D)-s(j);
-              end    
-           end
-        end
-
-        MZP=zeros(N,DZ);
-        for i=1:N
-            MZP(i,1) = z(i);
-           for j=2:DZ
-              if i+j-1<=DZ
-                 MZP(i,j)=z(i+j-1)-z(j);
-              else
-                 MZP(i,j)=z(DZ)-z(j);
               end      
            end
         end
+        K = ((M'*M + lamb(r) * eye(Nu))^(-1))* M';
+    
+        ku(r,:) = K(1,:)*MP;
+        ke(r) = sum(K(1,:));
+end
 
-        I=eye(Nu);
-        K=((M'*M+lambda(r)*I)^-1)*M';
-        ku(r,:)=K(1,:)*MP;
-        kz(r,:)=K(1,:)*MZP;
-        ke(r)=sum(K(1,:));
+%% Symulacja obiektu
+
+%warunki_początkowe
+kp = D/T + 2;
+ks = max(19,D+100); %chwila skoku wartosci zadania
+kk = t_sym/T;
+v1(1:kp) = v1_0;
+v2(1:kp) = v2_0;
+h2(1:kp) = h2_0;
+h1(1:kp) = h1_0;
+F1in(1:1000/T) = F1;
+F1in(1000/T:kk) = F1;
+FD = 15;
+FDc(1:T:t_sym/T) = FD;
+
+%Skok wartosci zadanej:
+yzad(1:ks)=38.44; 
+yzad(ks:5000)=50;
+yzad(5000:10000)=30;
+yzad(10000:15000)=40;
+
+error = 0;
+w = zeros(1,il_fun);
+Du = zeros(il_fun,1);
+DUp = zeros(1,D-1);
+Y = zeros(N,1);
+err_cur = 0;
+err_sum = 0;
+
+%główne wykonanie programu
+for k=kp:kk
+    for n=1:N
+    %yzad dla horyzontu predykcji
+        Y_zad(n,1) = yzad(k);
     end
-    deltaup=zeros(1,D-1);
-    deltazp=zeros(1,DZ-1);
-    deltauk = zeros(il,1);
-    Umax = 90;
-    Umin = 20;
-    dumax = 1;
-    w = zeros(1,il);
+    %symulacja obiektu
+    v1(k) = v1(k-1) + T*(F1in(k-1-(tau/T)) + FDc(k-1) - ap1*sqrt(h1(k-1)));
+    v2(k) = v2(k-1) + T*(ap1*sqrt(h1(k-1)) - ap2*(sqrt(h2(k-1))));
+    h1(k) = v1(k)/A1;
+    h2(k) = sqrt(v2(k)/C2);
+    
+    %Liczenie błędu
+    err_cur = yzad(k) - h2(k);
+    err_sum = err_sum + norm((yzad(k) - h2(k)))^2;
 
-    % dane
-    C1 = 0.95;
-    C2 = 0.95;
-    a1 = 16;
-    a2 = 16;
-    n = 12100;
-    tau = 50;
-    U0 = 54;
-    D0 = 10;
-    Y0 = 16;
-    V1 = C1*Y0^2;
-    h1 = Y0;
-    V2 = V1;
-    start = 100;
-    dY = [start 34; start+3000 4.5; start+6000 24; start+9000 14];
-    dZ = [start+1500 15; start+4500 5; start+7500 12.5; start+10500 7.5];
-
-    U = U0*ones(1,n);
-    Dist = D0*ones(1,n);
-    Y = Y0*ones(1,n);
-    Yz = Y;
-    for i = 1:length(dY)
-        Yz(dY(i,1):n) = dY(i,2);
-        Dist(dZ(i,1):n) = dZ(i,2);
+    %stała trajektoria referencyjna
+    for n=1:N
+        Y(n) = h2(k);
     end
-    e = zeros(1,n);
+    
+    for i = 1:il_fun
 
-    hold on
-    for k = start:n
-        % symulacja
-        V1 = V1 + U(k-1-tau) + Dist(k-1) - a1*h1^0.5;
-        V2 = V2 + a1*h1^0.5 - a2*Y(k-1)^0.5;
-        h1 = (V1/C1)^0.5;
-        Y(k) = (V2/C2)^0.5;
-        % uchyb
-        e(k) = Yz(k) - Y(k);
+        Du(i) = ke(i)*err_cur-ku(i,:)*DUp';
 
-        %uwzglêdnianie zak³ócenia
-        for i = DZ:-1:2
-           deltazp(i) = deltazp(i-1);
+        if i == 1
+            w(i) = trapmf(h2(k),[0 0 c(1)-nach/2 c(1)+ nach/2]);
+        elseif i == il_fun
+            w(i) = trapmf(h2(k),[c(il_fun-1)-nach/2 c(il_fun-1)+nach/2 h_max h_max]);
+        else
+            w(i) = trapmf(h2(k),[c(i-1)-nach/2 c(i-1)+ nach/2 c(i)-nach/2 c(i)+ nach/2]);
         end
-        deltazp(1) = Dist(k) - Dist(k-1);
+    end
+    
+    %Sprawdzenie liczenia wag
+    w_over_time(:,k) = w;
 
-        % Prawo regulacji
-        for i = 1:il
-            deltauk(i) = ke(i)*e(k)-ku(i,:)*deltaup'-kz(i,:)*deltazp';
-            if i == 1
-                w(i) = 1-1/(1+exp(-a*(Y(k)-c(1))));
-            elseif i == il
-                w(i) = 1/(1+exp(-a*(Y(k)-c(il-1))));
-            else
-                w(i) = 1/(1+exp(-a*(Y(k)-c(i-1)))) - 1/(1+exp(-a*(Y(k)-c(i))));
-            end
-        end
-        DELTAuk = w*deltauk/sum(w);
-        DELTAuk = max(min(DELTAuk, dumax),-dumax);
-
-        for i = D-1:-1:2
-          deltaup(i) = deltaup(i-1);
-        end
-        deltaup(1) = DELTAuk;
-        U(k) = U(k-1)+deltaup(1);
-        U(k) = max(min(U(k),Umax),Umin);
+    %Ogranieczenia przyrostu sterowania
+    DUfin = w * Du / sum(w);
+    if DUfin > DUmax
+        DUfin = DUmax;
+    elseif DUfin < -DUmax
+        DUfin = -DUmax;
     end
 
-    if draw
-        figure
-        subplot(3,1,1)
-        plot(1:n, Yz, 'r')
-        xlabel('t[s]')
-        ylabel('h2[cm]')
-        hold on
-        plot(1:n, Y, 'b')
-        subplot(3,1,2)
-        plot(1:n, U)
-        xlabel('t[s]')
-        ylabel('F1in[cm3/s]')
-        subplot(3,1,3)
-        plot(1:n, Dist)
-        xlabel('t[s]')
-        ylabel('FD[cm3/s]')
+    for i = D-1:-1:2
+      DUp(i) = DUp(i-1);
     end
-    E = sum(e.^2)/n;
+    DUp(1) = DUfin;
+
+    F1in(k) = F1in(k-1) + DUfin;
+
+    %Ograniczenia sterowania
+    if F1in(k) > Umax
+        F1in(k) = Umax;
+    elseif F1in(k) < Umin
+        F1in(k) = Umin;
+    end
+
+end
+
+if draw
+iteracja = 0:1:kk-1;
+%Plot wyjście
+figure;
+stairs(iteracja, h2)
+hold on;
+stairs(iteracja, yzad,"--");
+hold off;
+xlabel('k'); ylabel("h");
+legend("h_2","h_2_z_a_d")
+% exportgraphics(gca,'DMC_rozm_zmiana_wart.pdf')
+
+%Plot sterowanie
+figure;
+stairs(iteracja, F1in)
+legend("F_1_i_n")
+xlabel('k'); ylabel("F_1_i_n");
+% exportgraphics(gca,'DMC_rozm_zmiana_ster.pdf')
+end
+
+display(err_sum)
+
