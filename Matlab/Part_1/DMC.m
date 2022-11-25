@@ -4,10 +4,10 @@ file = load("Odp_skok\odp_skok.mat");
 s = file.s;
 
 %Parametry regulatora
-Nu = 4;
+Nu = 500;
 N = 1200;
 D = 1500;
-lamb = 25;
+lamb = 20000;
 
 %Parametry obiektu
 A1 = 505;
