@@ -5,7 +5,7 @@ clear all;
 
 draw = true;
 sa = false;
-il_fun = 20;
+il_fun = 5;
 set(0,'DefaultStairLineWidth',1);
 
 %% Definicja parametrów

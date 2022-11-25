@@ -80,6 +80,7 @@ FDc(5000:10000) = 15;
 FDc(10000:15000) = 7.5;
 
 
+
 %Skok wartosci zadanej:
 yzad(1:kk)=38.44; 
 

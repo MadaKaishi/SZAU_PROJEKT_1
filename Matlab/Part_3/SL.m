@@ -135,7 +135,7 @@ FDc(1:T:t_sym/T) = FD;
 
 %Skok wartosci zadanej:
 yzad(1:ks)=38.44; 
-yzad(ks:5000)=30;
+yzad(ks:5000)=40;
 yzad(5000:10000)=80;
 yzad(10000:15000)=20;
 yzad(15000:20000)=40;
@@ -143,7 +143,7 @@ yzad(15000:20000)=40;
 
 error = 0;
 w = zeros(1,il_fun);
-Du = zeros(il_fun,1);
+Du = zeros(1,Nu)';
 DUp = zeros(1,D-1)';
 err_cur = 0;
 err_sum = 0;
@@ -190,8 +190,9 @@ for k=kp:kk
         MPr = MPr + w(i)*MP(:,:,i)/sum(w);
     end
     lambr = w*lamb'/sum(w);
-    B(1:Nu)=(90-F1in(k-1)); %?
-    B(Nu+1:end) = (F1in(k-1)-20); %?
+
+    B(1:Nu)=(120-F1in(k-1)); %Górne ograniczenia
+    B(Nu+1:end) = (F1in(k-1)-30); %Dolne ograniczenia
     Yz(1:end)=yzad(k);
     yk(1:end)=h2(k);
     Du = fmincon(@(Du)(Yz-yk-MPr*DUp-Mr*Du)'*(Yz-yk-MPr*DUp-Mr*Du)+lambr*Du'*Du,Du,A,B);

@@ -5,15 +5,15 @@ sa = false;
 draw_f_przyn = true;
 
 set(0,'DefaultStairLineWidth',1);
-DUmax = 10;
-Umax = 150;
+DUmax = 1;
+Umax = 120;
 Umin = 0;
 
 %% Parametry regulatora
 Nu = 4;
 N = 1200;
 D = 1500;
-lamb = 25;
+lamb = 100;
 
 %liczba regulatorów
 il_fun = 5;

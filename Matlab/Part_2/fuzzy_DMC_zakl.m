@@ -2,59 +2,22 @@ clear; clc;
 %% Parametry programu
 draw = true;
 sa = false;
-draw_f_przyn = false;
-set(0,'DefaultStairLineWidth',1);
+draw_f_przyn = true;
 
-%% Zmienne modelu rozmytego
+set(0,'DefaultStairLineWidth',1);
+DUmax = 1;
+Umax = 120;
+Umin = 0;
+
+%% Parametry regulatora
+Nu = 4;
+N = 1200;
+D = 1500;
+lamb = 100;
 
 %liczba regulatorów
 il_fun = 5;
-
-h_min = 0;
-h_max = 90;
-h = (h_min:1:h_max)';
-
-nach = 3; %nachylenie funkcji 
-
-d = (h_max-h_min)/il_fun; %szerokości funkcji przynależnośći
-c = h_min+d:d:h_max-d; %punkty przegięcia
-
-%Wybranie punktu linearyzacji
-hr0 = ones(1,il_fun);
-hr0(1) = d/2;
-hr0(il_fun) = min((h_max+c(il_fun-1))/2+1, h_max);
-if il_fun > 2
-    hr0(2:il_fun-1) = (c(2:il_fun-1)+c(1:il_fun-2))./2;
-end
-
-
-%% Parametry regulatora
-
-N = 1200;
-D = 1500;
-lamb = 25;
-Nu = 5;
-
-
 lamb = lamb*ones(1,il_fun);
-
-MP = zeros(N,D-1,il_fun);
-M = zeros(N,Nu,il_fun);
-Snr = zeros(D,il_fun);
-
-for i = 1:il_fun
-    s = generate_step(hr0(i),false);
-    Snr(:,i)=s(1:D);
-   
-    for l=1:N
-       for j=1:Nu
-          if (l>=j)
-             M(l,j,i)=s(l-j+1);
-          end
-       end
-    end
-
-end
 
 
 %% Parametry modelu i symulacji
@@ -80,8 +43,28 @@ FD0 = 15;
 v2_0 = h2_0^2 * C2;
 v1_0 = h1_0 * A1;
 
-t_sym = 20000; %czas symulacji
+t_sym = 15000; %czas symulacji
 T = 1; %krok
+
+
+%% Zmienne modelu rozmytego
+h_min = 0;
+h_max = 90;
+h = (h_min:1:h_max)';
+
+nach = 3; %nachylenie funkcji 
+
+d = (h_max-h_min)/il_fun; %szerokości funkcji przynależnośći
+c = h_min+d:d:h_max-d; %punkty przegięcia
+
+%Wybranie punktu linearyzacji
+hr0 = ones(1,il_fun);
+hr0(1) = d/2;
+hr0(il_fun) = min((h_max+c(il_fun-1))/2+1, h_max);
+if il_fun > 2
+    hr0(2:il_fun-1) = (c(2:il_fun-1)+c(1:il_fun-2))./2;
+end
+
 
 ku = zeros(il_fun,D-1);
 ke = zeros(1,il_fun);
@@ -110,6 +93,37 @@ if draw_f_przyn
 end
 
 
+%% Liczenie poszczególnych regulatorów
+
+for r = 1:il_fun
+    s = generate_step(hr0(r),false);
+        
+    M=zeros(N,Nu);
+        for i=1:N
+           for j=1:Nu
+              if (i>=j)
+                 M(i,j)=s(i-j+1);
+              end
+           end
+        end
+        
+
+    MP=zeros(N,D-1);
+        for i=1:N
+           for j=1:D-1
+              if i+j<=D
+                 MP(i,j)=s(i+j)-s(j);
+              else
+                 MP(i,j)=s(D)-s(j);
+              end      
+           end
+        end
+    
+    K = ((M'*M + lamb(r) * eye(Nu))^(-1))* M';
+    ku(r,:) = K(1,:)*MP;
+    ke(r) = sum(K(1,:));
+end
+
 %% Symulacja obiektu
 
 %warunki_początkowe
@@ -122,27 +136,23 @@ h2(1:kp) = h2_0;
 h1(1:kp) = h1_0;
 F1in(1:T:kp) = F1;
 FD = 15;
-FDc(1:T:t_sym/T) = FD;
+FDc(kp:5000) = 30;
+FDc(5000:10000) = 15;
+FDc(10000:15000) = 7.5;
 
 %Skok wartosci zadanej:
-yzad(1:ks)=38.44; 
-yzad(ks:5000)=30;
-yzad(5000:10000)=80;
-yzad(10000:15000)=20;
-yzad(15000:20000)=40;
+yzad(1:kk)=38.44; 
+
 
 
 error = 0;
 w = zeros(1,il_fun);
 Du = zeros(il_fun,1);
-DUp = zeros(1,D-1)';
+DUp = zeros(1,D-1);
+Y = zeros(N,1);
 err_cur = 0;
 err_sum = 0;
-Yz = zeros(1,N)';
-yk = zeros(1,N)';
 
-A = [tril(ones(Nu));tril(ones(Nu))*-1]; %?
-B = zeros(2*Nu,1); %?
 %główne wykonanie programu
 for k=kp:kk
     for n=1:N
@@ -162,6 +172,9 @@ for k=kp:kk
 
     %Liczenie wartości przyrostu sterowania
     for i = 1:il_fun
+
+        Du(i) = ke(i)*err_cur-ku(i,:)*DUp';
+
         if i == 1
             w(i) = trapmf(h2(k),[0 0 c(1)-nach/2 c(1)+ nach/2]);
         elseif i == il_fun
@@ -174,68 +187,58 @@ for k=kp:kk
     %Sprawdzenie liczenia wag
     w_over_time(:,k) = w;
 
-    Mr = zeros(N,Nu);
-    Sr = zeros(D,1);
-
-    for i = 1:il_fun
-        Mr = Mr + w(i)*M(:,:,i)/sum(w);
-        Sr = Sr + w(i)*Snr(:,i)/sum(w);
-    end
-
-    lambr = w*lamb'/sum(w);
-    Y0 = zeros(n,1);
-    dk = h2(k);
+    %Ogranieczenia przyrostu sterowania
+    DUfin = w * Du / sum(w);
     
-    %Wyznaczanie błędu modelu
-    if k<=D
-        dk = dk-Sr(D)*F1in(1);
-    else
-        dk = dk-Sr(D)*F1in(k-D);
+    if DUfin > DUmax
+        DUfin = DUmax;
+    elseif DUfin < -DUmax
+        DUfin = -DUmax;
     end
 
-    for i = 1:D-1
-        if i< k-1
-            dk=dk-Sr(i)*(F1in(k-i)-F1in(k-i-1));
-        end
-    end
-    
-    %Wyznaczanie trajektorii swobodnej
-    for i=1:N
-
-        if k-1<D-i
-            Y0(i)=Sr(D)*F1in(1)+dk;
-        else
-            Y0(i)=Sr(D)*F1in(k-D+i)+dk;
-        end
-        for j = i+1:D-1
-            if j-i<k-1
-                Y0(i)=Y0(i)+Sr(j)*(F1in(k-j+i)-F1in(k-j+i-1));
-            end
-        end
-     end
-
-
-    B(1:Nu)=(120-F1in(k-1));
-    B(Nu+1:end) = (F1in(k-1)-30); 
-    Yz(1:end)=yzad(k);
-
-    %Różnica względem SL jest w uwzględnieniu Y0 zamiast stałego hoyzontu
-    %jako h2 oraz braku macierzy MPr
-    Du = fmincon(@(Du)(Yz-Y0-Mr*Du)'*(Yz-Y0-Mr*Du)+lambr*Du'*Du,Du,A,B);
-    holder = Du(1);
     for i = D-1:-1:2
-        DUp(i) = DUp(i-1);
+      DUp(i) = DUp(i-1);
     end
-    DUp(1) = holder;
+    DUp(1) = DUfin;
+
     F1in(k) = F1in(k-1) + DUp(1);
 
-    plot(h2, 'b')
-    hold on
-    plot(F1in,'g')
-    plot(yzad,"--r")
-    drawnow;
+    %Ograniczenia sterowania
+    if F1in(k) > Umax
+        F1in(k) = Umax;
+    elseif F1in(k) < Umin
+        F1in(k) = Umin;
+    end
 
 end
 
+if draw
+%Plot wyjście
+f = figure;
+subplot(3,1,1)
+stairs(1:kk,h2)
+xlabel("k")
+ylabel("h_2")
+title(sprintf("h_2 error=%d",err_sum))
+ylim([25, 50])
+
+subplot(3,1,2)
+stairs(1:kk,FDc)
+xlabel("k")
+ylabel("Fd")
+title("Fd")
+ylim([0, 32])
+% exportgraphics(f,'odp_na_zmiane_zakl.pdf')
+
+subplot(3,1,3)
+stairs(1:kk,F1in)
+xlabel("k")
+ylabel("F_1_i_n")
+title("F_1_i_n")
+ylim([60, 90])
+
+% exportgraphics(f,'odp_na_zmiane_zakl.pdf')
+
+end
 display(err_sum)
 

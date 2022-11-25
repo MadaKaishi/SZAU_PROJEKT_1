@@ -80,7 +80,7 @@ FD0 = 15;
 v2_0 = h2_0^2 * C2;
 v1_0 = h1_0 * A1;
 
-t_sym = 20000; %czas symulacji
+t_sym = 15000; %czas symulacji
 T = 1; %krok
 
 ku = zeros(il_fun,D-1);
@@ -122,15 +122,12 @@ h2(1:kp) = h2_0;
 h1(1:kp) = h1_0;
 F1in(1:T:kp) = F1;
 FD = 15;
-FDc(1:T:t_sym/T) = FD;
+FDc(kp:5000) = 30;
+FDc(5000:10000) = 15;
+FDc(10000:15000) = 7.5;
 
 %Skok wartosci zadanej:
-yzad(1:ks)=38.44; 
-yzad(ks:5000)=30;
-yzad(5000:10000)=80;
-yzad(10000:15000)=20;
-yzad(15000:20000)=40;
-
+yzad(1:kk)=38.44; 
 
 error = 0;
 w = zeros(1,il_fun);
@@ -233,8 +230,35 @@ for k=kp:kk
     hold on
     plot(F1in,'g')
     plot(yzad,"--r")
+    plot(FDc,"black")
     drawnow;
 
+end
+
+if draw
+%Plot wyjście
+f = figure;
+subplot(3,1,1)
+stairs(1:kk,h2)
+xlabel("k")
+ylabel("h_2")
+title(sprintf("h_2 error=%d",err_sum))
+ylim([25, 50])
+
+subplot(3,1,2)
+stairs(1:kk,FDc)
+xlabel("k")
+ylabel("Fd")
+title("Fd")
+ylim([0, 32])
+% exportgraphics(f,'odp_na_zmiane_zakl.pdf')
+
+subplot(3,1,3)
+stairs(1:kk,F1in)
+xlabel("k")
+ylabel("F_1_i_n")
+title("F_1_i_n")
+ylim([60, 90])
 end
 
 display(err_sum)
