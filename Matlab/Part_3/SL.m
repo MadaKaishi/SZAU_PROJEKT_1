@@ -33,6 +33,7 @@ end
 N = 1200;
 D = 1500;
 lamb = 6000;
+lamb = 60000;
 Nu = 5;
 
 
@@ -89,7 +90,11 @@ FD0 = 15;
 v2_0 = h2_0^2 * C2;
 v1_0 = h1_0 * A1;
 
+<<<<<<< HEAD
 t_sym = 6000; %czas symulacji
+=======
+t_sym = 14000; %czas symulacji
+>>>>>>> 457b50f102d9213cf60b87dcdca5ce328d712609
 T = 1; %krok
 
 ku = zeros(il_fun,D-1);
@@ -135,10 +140,17 @@ FDc(1:T:t_sym/T) = FD;
 
 %Skok wartosci zadanej:
 yzad(1:ks)=38.44; 
+<<<<<<< HEAD
 yzad(ks:2500)=40;
 yzad(2500:4500)=80;
 yzad(4500:600)=20;
 yzad(6000:7000)=40;
+=======
+yzad(ks:3500)=40;
+yzad(3500:6500)=80;
+yzad(6500:10000)=20;
+yzad(10000:14000)=40;
+>>>>>>> 457b50f102d9213cf60b87dcdca5ce328d712609
 
 
 error = 0;
