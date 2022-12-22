@@ -32,7 +32,7 @@ end
 
 N = 1200;
 D = 1500;
-lamb = 25;
+lamb = 6000;
 Nu = 5;
 
 
@@ -89,7 +89,7 @@ FD0 = 15;
 v2_0 = h2_0^2 * C2;
 v1_0 = h1_0 * A1;
 
-t_sym = 20000; %czas symulacji
+t_sym = 6000; %czas symulacji
 T = 1; %krok
 
 ku = zeros(il_fun,D-1);
@@ -135,10 +135,10 @@ FDc(1:T:t_sym/T) = FD;
 
 %Skok wartosci zadanej:
 yzad(1:ks)=38.44; 
-yzad(ks:5000)=40;
-yzad(5000:10000)=80;
-yzad(10000:15000)=20;
-yzad(15000:20000)=40;
+yzad(ks:2500)=40;
+yzad(2500:4500)=80;
+yzad(4500:600)=20;
+yzad(6000:7000)=40;
 
 
 error = 0;
@@ -195,7 +195,8 @@ for k=kp:kk
     B(Nu+1:end) = (F1in(k-1)-30); %Dolne ograniczenia
     Yz(1:end)=yzad(k);
     yk(1:end)=h2(k);
-    Du = fmincon(@(Du)(Yz-yk-MPr*DUp-Mr*Du)'*(Yz-yk-MPr*DUp-Mr*Du)+lambr*Du'*Du,Du,A,B);
+    OPTIONS = optimoptions('fmincon','UseParallel',true, 'MaxFunctionEvaluations', 150);
+    Du = fmincon(@(Du)(Yz-yk-MPr*DUp-Mr*Du)'*(Yz-yk-MPr*DUp-Mr*Du)+lambr*Du'*Du,Du,A,B,[],[],ones(Nu,1)*-60,ones(Nu,1)*60);
     holder = Du(1);
     for i = D-1:-1:2
         DUp(i) = DUp(i-1);
@@ -207,6 +208,8 @@ for k=kp:kk
     hold on
     plot(F1in,'g')
     plot(yzad,"--r")
+    xlabel("k")
+    legend("Wyjście regulatora", "Sterowanie")
     drawnow;
 
 end

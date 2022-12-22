@@ -51,9 +51,9 @@ end
 % h2(:,1) = sqrt(v2 /C2);
 
 %Skok jednostkowy
-Yj = h2 - h2(1);
+Yj = h2 - h2(kp);
 Yj = Yj/dF1;
-s = Yj(:,1:D);
+s = Yj(:,kp:D+1);
 
 if draw
     plot(Yj)

@@ -10,10 +10,10 @@ Umax = 120;
 Umin = 0;
 
 %% Parametry regulatora
-Nu = 4;
+Nu = 500;
 N = 1200;
 D = 1500;
-lamb = 100;
+lamb = 60000;
 
 %liczba regulatorów
 il_fun = 5;

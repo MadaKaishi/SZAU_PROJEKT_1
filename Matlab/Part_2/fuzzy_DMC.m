@@ -12,8 +12,8 @@ Umin = 0;
 %% Parametry regulatora
 Nu = 500;
 N = 1200;
-D = 1500;
-lamb = 40000;
+D = 1200;
+lamb = 10;
 
 %liczba regulatorów
 il_fun = 5;
@@ -223,14 +223,14 @@ stairs(iteracja, yzad,"--");
 hold off;
 xlabel('k'); ylabel("h");
 legend("h_2","h_2_z_a_d")
-% exportgraphics(gca,'DMC_rozm_zmiana_wart.pdf')
+exportgraphics(gca,'DMC_rozm_zmiana_wart.pdf')
 
 %Plot sterowanie
 figure;
 stairs(iteracja, F1in)
 legend("F_1_i_n")
 xlabel('k'); ylabel("F_1_i_n");
-% exportgraphics(gca,'DMC_rozm_zmiana_ster.pdf')
+exportgraphics(gca,'DMC_rozm_zmiana_ster.pdf')
 end
 
 display(err_sum)

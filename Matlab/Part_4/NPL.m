@@ -221,7 +221,7 @@ for k=kp:kk
 
     %Różnica względem SL jest w uwzględnieniu Y0 zamiast stałego hoyzontu
     %jako h2 oraz braku macierzy MPr
-    Du = fmincon(@(Du)(Yz-Y0-Mr*Du)'*(Yz-Y0-Mr*Du)+lambr*Du'*Du,Du,A,B);
+    Du = quadprog(@(Du)(Yz-Y0-Mr*Du)'*(Yz-Y0-Mr*Du)+lambr*Du'*Du,Du,A,B);
     holder = Du(1);
     for i = D-1:-1:2
         DUp(i) = DUp(i-1);

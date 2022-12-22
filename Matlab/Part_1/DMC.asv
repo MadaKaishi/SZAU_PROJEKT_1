@@ -6,8 +6,8 @@ s = file.s;
 %Parametry regulatora
 Nu = 500;
 N = 1200;
-D = 1200;
-lamb = 2;
+D = 1500;
+lamb = 6000;
 
 %Parametry obiektu
 A1 = 505;

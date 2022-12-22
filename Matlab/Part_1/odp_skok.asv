@@ -40,10 +40,10 @@ v2(1:kp) = v2_0;
 F1in(1:T:t_sym/T) = F1;
 FDc(1:T:t_sym/T) = FD;
 
-
+F1in(2:t_sym) = F1 + dF1;
 %Symulacja obiektu liniowego
 for k = kp:t_sym/T
-    F1in(k) = F1+dF1;
+%     F1in(k) = F1+dF1;
         v1(k) = v1(k-1) + T*(F1in(k-1-(tau/T)) - F10 + FDc(k-1) - FD0 - (ap1/(2*(sqrt(h1_0))))*(h1(k-1)-h1_0));
         v2(k) = v2(k-1) + T*((ap1/(2*(sqrt(h1_0))))*(h1(k-1)-h1_0) - (ap2/(2*(sqrt(h2_0))))*(h2(k-1)-h2_0)); 
         h2(k) = h2_0 + 1/(2*sqrt(C2*v2_0))*(v2(k) - v2_0);
@@ -52,10 +52,10 @@ end
 
 
 %Skok jednostkowy
-Yj = h2 - h2(kp);
-Yj = Yj/dF1;
-s = Yj(:,kp:D+1);
-plot(s)
+Yj = h2 - h2(1);
+Yj = Yj/(dF1);
+s = Yj(:,1:D);
+plot(Yj)
 title("Odpowiedz skokowa")
 ylabel("h_2")
 xlabel("k")
