@@ -5,7 +5,6 @@ sa = false;
 draw_f_przyn = true;
 
 set(0,'DefaultStairLineWidth',1);
-DUmax = 1;
 Umax = 120;
 Umin = 0;
 
@@ -13,7 +12,7 @@ Umin = 0;
 Nu = 500;
 N = 1200;
 D = 1200;
-lamb = 10;
+lamb = 1;
 
 %liczba regulatorów
 il_fun = 5;
@@ -96,7 +95,7 @@ end
 %% Liczenie poszczególnych regulatorów
 
 for r = 1:il_fun
-    s = generate_step(hr0(r),false);
+    s = generate_step_v2(hr0(r),false);
         
     M=zeros(N,Nu);
         for i=1:N
@@ -191,12 +190,6 @@ for k=kp:kk
     %Ogranieczenia przyrostu sterowania
     DUfin = w * Du / sum(w);
     
-    if DUfin > DUmax
-        DUfin = DUmax;
-    elseif DUfin < -DUmax
-        DUfin = -DUmax;
-    end
-
     for i = D-1:-1:2
       DUp(i) = DUp(i-1);
     end
@@ -223,14 +216,14 @@ stairs(iteracja, yzad,"--");
 hold off;
 xlabel('k'); ylabel("h");
 legend("h_2","h_2_z_a_d")
-exportgraphics(gca,'DMC_rozm_zmiana_wart.pdf')
+% exportgraphics(gca,'DMC_rozm_zmiana_wart.pdf')
 
 %Plot sterowanie
 figure;
 stairs(iteracja, F1in)
 legend("F_1_i_n")
 xlabel('k'); ylabel("F_1_i_n");
-exportgraphics(gca,'DMC_rozm_zmiana_ster.pdf')
+% exportgraphics(gca,'DMC_rozm_zmiana_ster.pdf')
 end
 
 display(err_sum)
