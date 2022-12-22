@@ -13,7 +13,7 @@ Umin = 0;
 Nu = 500;
 N = 1200;
 D = 1500;
-lamb = 60000;
+lamb = 10;
 
 %liczba regulatorów
 il_fun = 5;
