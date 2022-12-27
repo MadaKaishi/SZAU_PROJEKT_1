@@ -121,8 +121,8 @@ v2 = h2_0^2 * C2 * ones(il_fun+1,kk);
 
 if draw
     plot(s)
-    figure
-    plot(h2(6,:))
+%     figure
+%     plot(h2(6,:))
 end
 
 end

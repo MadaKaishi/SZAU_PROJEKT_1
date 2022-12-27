@@ -4,10 +4,14 @@ file = load("Odp_skok\odp_skok.mat");
 s = file.s;
 
 %Parametry regulatora
-Nu = 100;
-N = 400;
-D = 1200;
-lamb = 1;
+Nu = 1500;
+N = 1500;
+D = 1500;
+lamb = 5;
+
+Umax = 300;
+Umin = 0;
+
 
 %Parametry obiektu
 A1 = 505;
@@ -79,7 +83,7 @@ FDc(kp:5000) = 30;
 FDc(5000:10000) = 15;
 FDc(10000:15000) = 7.5;
 
-
+Y_zad = zeros(N,1);
 
 %Skok wartosci zadanej:
 yzad(1:kk)=38.44; 
@@ -104,21 +108,32 @@ for k=kp:kk
     for n = 1:D-1
         DUp(n) = F1in(k-n) - F1in(k-n-1);
     end
+    
     Yo = MP*DUp+Y;
     DU = K*(Y_zad - Yo);
     F1in(k)=F1in(k-1)+DU(1);  
     error = error + norm((yzad(k) - h2(k)))^2;
+
+    if F1in(k) > Umax
+        F1in(k) = Umax;
+    elseif F1in(k) < Umin
+        F1in(k) = Umin;
+    end
+
+    DU(1) =  F1in(k) -  F1in(k-1);
+
 end
 
 
 %Plot wyjście
 f = figure;
+title(sprintf("h_2 error=%d",error))
 subplot(3,1,1)
 stairs(1:kk,h2)
 xlabel("k")
 ylabel("h_2")
-title("h_2")
 ylim([25, 50])
+
 
 subplot(3,1,2)
 stairs(1:kk,FDc)
@@ -126,7 +141,7 @@ xlabel("k")
 ylabel("Fd")
 title("Fd")
 ylim([0, 32])
-% exportgraphics(f,'odp_na_zmiane_zakl.pdf')
+
 
 subplot(3,1,3)
 stairs(1:kk,F1in)
@@ -134,6 +149,9 @@ xlabel("k")
 ylabel("F_1_i_n")
 title("F_1_i_n")
 ylim([60, 90])
+
+
+
 
 % exportgraphics(f,'odp_na_zmiane_zakl.pdf')
 display(error)

@@ -4,10 +4,13 @@ file = load("Odp_skok\odp_skok.mat");
 s = file.s;
 
 %Parametry regulatora
-Nu = 500;
-N = 1200;
-D = 1200;
-lamb = 2;
+Nu = 1400;
+N = 1400;
+D = 1400;
+lamb = 5;
+
+Umax = 300;
+Umin = 0;
 
 %Parametry obiektu
 A1 = 505;
@@ -87,6 +90,8 @@ yzad(15000:20000)=40;
 
 error = 0;
 err = 0;
+del_u = 0;
+
 %główne wykonanie programu
 for k=kp:kk
 
@@ -101,12 +106,23 @@ for k=kp:kk
         DUp(i) = DUp(i-1);
     end
     
+    DUp(1) = del_u;
+
     err = yzad(k) - h2(k);
     del_u = Ke*err-Ku*DUp';
-    DUp(1) = del_u;
+   
    
     F1in(k)=F1in(k-1)+del_u;  
     error = error + norm((yzad(k) - h2(k)))^2;
+
+    if F1in(k) > Umax
+        F1in(k) = Umax;
+    elseif F1in(k) < Umin
+        F1in(k) = Umin;
+    end
+
+    del_u =  F1in(k) -  F1in(k-1);
+
 end
 
 iteracja = 0:1:kk-1;
@@ -118,6 +134,7 @@ stairs(iteracja, yzad,"--");
 hold off;
 xlabel('k'); ylabel("h");
 legend("h_2","h_2_z_a_d")
+title("Regulator DMC, error = " + error)
 % exportgraphics(gca,'DMC_zmiana_wart.pdf')
 
 %Plot sterowanie
@@ -125,6 +142,7 @@ figure;
 stairs(iteracja, F1in)
 legend("F_1_i_n")
 xlabel('k'); ylabel("F_1_i_n");
+title("Sterowanie regulaotra DMC")
 % exportgraphics(gca,'DMC_zmiana_ster.pdf')
 
 display(error)

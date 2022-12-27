@@ -2,7 +2,7 @@ clear all
 
 %% Wymierzanie skoku jednostkowego
 
-D = 1500;
+D = 2000;
 
 %skok wartosci F1
 dF1 = 1;
@@ -27,7 +27,7 @@ FD0 = 15;
 v2_0 = h2_0^2 * C2;
 v1_0 = h1_0 * A1;
 
-t_sym = 1600; %czas symulacji
+t_sym = 2200; %czas symulacji
 T = 1; %krok
 
 %warunki_początkowe

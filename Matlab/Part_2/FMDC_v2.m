@@ -5,14 +5,14 @@ sa = false;
 draw_f_przyn = true;
 
 set(0,'DefaultStairLineWidth',1);
-Umax = 120;
+Umax = 300;
 Umin = 0;
 
 %% Parametry regulatora
-Nu = 1;
-N = 1200;
-D = 1200;
-lamb = 10;
+Nu = 1400;
+N = 1400;
+D = 1400;
+lamb = 5;
 
 %liczba regulatorów
 il_fun = 5;
@@ -96,7 +96,7 @@ end
 
 for r = 1:il_fun
     s = generate_step_v2(hr0(r),false);
-        
+    k_s(:,:,r) = s;
     M=zeros(N,Nu);
         for i=1:N
            for j=1:Nu
@@ -200,7 +200,7 @@ for k=kp:kk
     DUfin = w * Du / sum(w);
 
 
-    F1in(k) = F1in(k-1) + DUp(1);
+    F1in(k) = F1in(k-1) + DUfin;
 
     %Ograniczenia sterowania
     if F1in(k) > Umax
@@ -208,6 +208,8 @@ for k=kp:kk
     elseif F1in(k) < Umin
         F1in(k) = Umin;
     end
+    
+    DUfin = F1in(k) - F1in(k-1); 
 
 end
 
@@ -221,6 +223,7 @@ stairs(iteracja, yzad,"--");
 hold off;
 xlabel('k'); ylabel("h");
 legend("h_2","h_2_z_a_d")
+title("Regulator FDMC, error = " + err_sum)
 % exportgraphics(gca,'DMC_rozm_zmiana_wart.pdf')
 
 %Plot sterowanie
@@ -228,6 +231,7 @@ figure;
 stairs(iteracja, F1in)
 legend("F_1_i_n")
 xlabel('k'); ylabel("F_1_i_n");
+title("Sterowanie regulaotra FDMC")
 % exportgraphics(gca,'DMC_rozm_zmiana_ster.pdf')
 end
 
