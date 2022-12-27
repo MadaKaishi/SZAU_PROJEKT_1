@@ -1,23 +1,23 @@
-   - Eksperymenty powinny się zaczynać ze stanu ustalonego;
+   - Eksperymenty powinny się zaczynać ze stanu ustalonego; DONE
 
    - Regulator DMC jest zapewne zaimplementowany z błędami (proszę sprawdzić, czy opóźnienie jest modelowane właściwe);  DONE
 
-   - Brakuje próby poprawienia wybranego modelu rozmytego;
+   - Brakuje próby poprawienia wybranego modelu rozmytego; ---
 
-   - Przyrostów sterowania proszę nie ograniczać;
+   - Przyrostów sterowania proszę nie ograniczać; DONE
 
-   - Podczas porównywania działania regulatorów, otrzymane odpowiedzi powinny być zamieszczone na tych samych rysunkach;
+   - Podczas porównywania działania regulatorów, otrzymane odpowiedzi powinny być zamieszczone na tych samych rysunkach; In Progress
 
-   - Regulator FDMC jest zapewne zaimplementowany z błędami (proszę sprawdzić, czy opóźnienie jest modelowane właściwe; na przebiegach są widoczne niepokojące oscylacje);
+   - Regulator FDMC jest zapewne zaimplementowany z błędami (proszę sprawdzić, czy opóźnienie jest modelowane właściwe; na przebiegach są widoczne niepokojące oscylacje); DONE
 
    - Algorytmy typu SL i NPL powinny być zaimplementowane z wykorzystaniem funkcji quadprog;
 
-   - Regulator typu SL jest zapewne zaimplementowany z błędami;
+   - Regulator typu SL jest zapewne zaimplementowany z błędami; ---
 
-   - Regulator typu NPL jest zapewne zaimplementowany z błędami;
+   - Regulator typu NPL jest zapewne zaimplementowany z błędami; ---
 
    - W algorytmie typu NPL, Sr powinno móc się zmieniać w każdej chwili z horyzontu predykcji;
 
    - Podczas porównywania działania algorytmów, w początkowej fazie eksperymentów, powinny one mieć takie same nastawy;
 
-   - Należy także przetestować działanie układów regulacji w obecności ograniczeń w taki sposób, aby ograniczenia te były dłuższy czas aktywne.
+   - Należy także przetestować działanie układów regulacji w obecności ograniczeń w taki sposób, aby ograniczenia te były dłuższy czas aktywne. (Zadanie 5)

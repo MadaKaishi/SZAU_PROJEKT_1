@@ -4,6 +4,7 @@ draw = true;
 sa = false;
 draw_f_przyn = false;
 set(0,'DefaultStairLineWidth',1);
+options = optimoptions('quadprog'); options.Display = 'none'; 
 
 %% Zmienne modelu rozmytego
 
@@ -13,6 +14,10 @@ il_fun = 5;
 h_min = 0;
 h_max = 90;
 h = (h_min:1:h_max)';
+
+
+dumin = -inf;
+dumax = inf;
 
 nach = 3; %nachylenie funkcji 
 
@@ -32,8 +37,7 @@ end
 
 N = 1200;
 D = 1500;
-lamb = 6000;
-lamb = 60000;
+lamb = 1;
 Nu = 5;
 
 
@@ -90,11 +94,7 @@ FD0 = 15;
 v2_0 = h2_0^2 * C2;
 v1_0 = h1_0 * A1;
 
-<<<<<<< HEAD
-t_sym = 6000; %czas symulacji
-=======
-t_sym = 14000; %czas symulacji
->>>>>>> 457b50f102d9213cf60b87dcdca5ce328d712609
+t_sym = 20000; %czas symulacji
 T = 1; %krok
 
 ku = zeros(il_fun,D-1);
@@ -140,17 +140,11 @@ FDc(1:T:t_sym/T) = FD;
 
 %Skok wartosci zadanej:
 yzad(1:ks)=38.44; 
-<<<<<<< HEAD
-yzad(ks:2500)=40;
-yzad(2500:4500)=80;
-yzad(4500:600)=20;
-yzad(6000:7000)=40;
-=======
-yzad(ks:3500)=40;
-yzad(3500:6500)=80;
-yzad(6500:10000)=20;
-yzad(10000:14000)=40;
->>>>>>> 457b50f102d9213cf60b87dcdca5ce328d712609
+yzad(ks:5000)=30;
+yzad(5000:10000)=80;
+yzad(10000:15000)=20;
+yzad(15000:20000)=40;
+
 
 
 error = 0;
@@ -203,12 +197,20 @@ for k=kp:kk
     end
     lambr = w*lamb'/sum(w);
 
-    B(1:Nu)=(120-F1in(k-1)); %Górne ograniczenia
-    B(Nu+1:end) = (F1in(k-1)-30); %Dolne ograniczenia
     Yz(1:end)=yzad(k);
     yk(1:end)=h2(k);
-    OPTIONS = optimoptions('fmincon','UseParallel',true, 'MaxFunctionEvaluations', 150);
-    Du = fmincon(@(Du)(Yz-yk-MPr*DUp-Mr*Du)'*(Yz-yk-MPr*DUp-Mr*Du)+lambr*Du'*Du,Du,A,B,[],[],ones(Nu,1)*-60,ones(Nu,1)*60);
+    H = 2*(Mr'*Mr + lambr*eye(Nu,Nu));
+    H = (H+H')/2;
+    f = -2*Mr'*(Yz-yk-MPr*DUp-Mr*Du);
+    J = tril(ones(Nu,Nu));
+    U = ones(Nu,1)*F1in(k-1);
+    A_opt = [-J;J];
+    B_opt = [0+U;300-U];
+
+    Du = quadprog(H,f,A_opt,B_opt,[],[],ones(Nu,1)*dumin, ones(Nu,1)*dumax, [], options);
+
+%     OPTIONS = optimoptions('fmincon','UseParallel',true, 'MaxFunctionEvaluations', 150);
+%     Du = fmincon(@(Du)(Yz-yk-MPr*DUp-Mr*Du)'*(Yz-yk-MPr*DUp-Mr*Du)+lambr*Du'*Du,Du,A,B,[],[],ones(Nu,1)*-60,ones(Nu,1)*60);
     holder = Du(1);
     for i = D-1:-1:2
         DUp(i) = DUp(i-1);
@@ -224,6 +226,7 @@ for k=kp:kk
     legend("Wyjście regulatora", "Sterowanie")
     drawnow;
 
+    disp(k)
 end
 
 display(err_sum)

@@ -9,7 +9,7 @@ N = 1400;
 D = 1400;
 lamb = 5;
 
-Umax = 300;
+Umax = 200;
 Umin = 0;
 
 %Parametry obiektu
