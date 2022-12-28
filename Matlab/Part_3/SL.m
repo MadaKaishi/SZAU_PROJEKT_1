@@ -4,7 +4,7 @@ draw = true;
 sa = false;
 draw_f_przyn = false;
 set(0,'DefaultStairLineWidth',1);
-options = optimoptions('quadprog'); options.Display = 'none'; 
+options = optimoptions('quadprog', "Algorithm","active-set"); options.Display = 'none'; 
 
 %% Zmienne modelu rozmytego
 
@@ -158,6 +158,7 @@ yk = zeros(1,N)';
 
 A = [tril(ones(Nu));tril(ones(Nu))*-1]; %?
 B = zeros(2*Nu,1); %?
+ws = optimwarmstart(zeros(Nu,1),options);
 %główne wykonanie programu
 for k=kp:kk
     for n=1:N
@@ -201,17 +202,16 @@ for k=kp:kk
     yk(1:end)=h2(k);
     H = 2*(Mr'*Mr + lambr*eye(Nu,Nu));
     H = (H+H')/2;
-    f = -2*Mr'*(Yz-yk-MPr*DUp-Mr*Du);
+    f = -2*Mr'*(Yz-yk-MPr*DUp);
     J = tril(ones(Nu,Nu));
     U = ones(Nu,1)*F1in(k-1);
     A_opt = [-J;J];
     B_opt = [0+U;300-U];
-
-    Du = quadprog(H,f,A_opt,B_opt,[],[],ones(Nu,1)*dumin, ones(Nu,1)*dumax, [], options);
-
+    test = quadprog(H,f,A_opt,B_opt,[],[],ones(Nu,1)*dumin, ones(Nu,1)*dumax, ws);
 %     OPTIONS = optimoptions('fmincon','UseParallel',true, 'MaxFunctionEvaluations', 150);
 %     Du = fmincon(@(Du)(Yz-yk-MPr*DUp-Mr*Du)'*(Yz-yk-MPr*DUp-Mr*Du)+lambr*Du'*Du,Du,A,B,[],[],ones(Nu,1)*-60,ones(Nu,1)*60);
-    holder = Du(1);
+    Du = test.X;
+holder = Du(1);
     for i = D-1:-1:2
         DUp(i) = DUp(i-1);
     end
