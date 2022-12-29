@@ -2,11 +2,11 @@ clear; clc;
 
 file = load("Odp_skok\odp_skok.mat");
 s = file.s;
-
+set(0,'DefaultStairLineWidth',1);
 %Parametry regulatora
-Nu = 1400;
-N = 1400;
-D = 1400;
+Nu = 10;
+N = 200;
+D = 1500;
 lamb = 5;
 
 Umax = 200;
@@ -135,7 +135,7 @@ hold off;
 xlabel('k'); ylabel("h");
 legend("h_2","h_2_z_a_d")
 title("Regulator DMC, error = " + error)
-% exportgraphics(gca,'DMC_zmiana_wart.pdf')
+exportgraphics(gca,'DMC_zmiana_wart.pdf')
 
 %Plot sterowanie
 figure;
@@ -143,6 +143,6 @@ stairs(iteracja, F1in)
 legend("F_1_i_n")
 xlabel('k'); ylabel("F_1_i_n");
 title("Sterowanie regulaotra DMC")
-% exportgraphics(gca,'DMC_zmiana_ster.pdf')
+exportgraphics(gca,'DMC_zmiana_ster.pdf')
 
 display(error)

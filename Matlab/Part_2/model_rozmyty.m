@@ -35,8 +35,8 @@ T = 1; %krok
 h_min = 0;
 h_max = 90;
 h = (h_min:1:h_max)';
-
-nach = 3; %nachylenie funkcji 
+err = 0;
+nach = 10; %nachylenie funkcji 
 
 d = (h_max-h_min)/il_fun; %szerokości funkcji przynależnośći
 c = h_min+d:d:h_max-d; %punkty przegięcia
@@ -128,8 +128,14 @@ for P = 36:21:120
     stairs((1:k),h2(il_fun+1,:),"b")
     legend("Model nieliniowy", "Model zlinearyzowany", "Model rozmyty","Location","northoutside","Orientation","horizontal")
 
+    err = norm(h2(il_fun+1,:)-h2(il_fun+2,:))^2;
+
     clear v1 v2 h1 h2
 end
+
+display(err)
+
+    title("Porownanie modeli rozmytych, nachylenie = " + nach + " error = " +err)
 if sa
-    print(sprintf("Porown_rozm_mod_il_%i",il_fun),'-dpng','-r400');
+    print(sprintf("Porown_rozm_mod_il_%i_%i",il_fun,nach),'-dpng','-r400');
 end

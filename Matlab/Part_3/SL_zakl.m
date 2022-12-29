@@ -4,6 +4,7 @@ draw = true;
 sa = false;
 draw_f_przyn = false;
 set(0,'DefaultStairLineWidth',1);
+options = optimoptions('quadprog', "Algorithm","active-set"); options.Display = 'none'; 
 
 %% Zmienne modelu rozmytego
 
@@ -13,6 +14,10 @@ il_fun = 5;
 h_min = 0;
 h_max = 90;
 h = (h_min:1:h_max)';
+
+
+dumin = -inf;
+dumax = inf;
 
 nach = 3; %nachylenie funkcji 
 
@@ -32,9 +37,11 @@ end
 
 N = 1200;
 D = 1500;
-lamb = 60000;
-Nu = 5;
+lamb = 1;
+Nu = 1200;
 
+Umax = 140;
+Umin = 0;
 
 lamb = lamb*ones(1,il_fun);
 
@@ -89,7 +96,7 @@ FD0 = 15;
 v2_0 = h2_0^2 * C2;
 v1_0 = h1_0 * A1;
 
-t_sym = 15000; %czas symulacji
+t_sym = 5000; %czas symulacji
 T = 1; %krok
 
 ku = zeros(il_fun,D-1);
@@ -131,13 +138,13 @@ h2(1:kp) = h2_0;
 h1(1:kp) = h1_0;
 F1in(1:T:kp) = F1;
 FD = 15;
-FDc(1:kp) = FD;
-FDc(kp:5000) = 30;
-FDc(5000:10000) = 15;
-FDc(10000:15000) = 7.5;
+FDc(1:T:t_sym/T) = FD;
 
 %Skok wartosci zadanej:
-yzad(1:kk)=38.44; 
+yzad(1:5000)=38.44; 
+FDc(1:ks) = FD;
+FDc(ks:3250) = FD+7.5;
+FDc(3250:5000) = FD-7.5;
 
 
 
@@ -152,6 +159,7 @@ yk = zeros(1,N)';
 
 A = [tril(ones(Nu));tril(ones(Nu))*-1]; %?
 B = zeros(2*Nu,1); %?
+ws = optimwarmstart(zeros(Nu,1),options);
 %główne wykonanie programu
 for k=kp:kk
     for n=1:N
@@ -191,11 +199,19 @@ for k=kp:kk
     end
     lambr = w*lamb'/sum(w);
 
-    B(1:Nu)=(120-F1in(k-1)); %Górne ograniczenia
-    B(Nu+1:end) = (F1in(k-1)-30); %Dolne ograniczenia
     Yz(1:end)=yzad(k);
     yk(1:end)=h2(k);
-    Du = fmincon(@(Du)(Yz-yk-MPr*DUp-Mr*Du)'*(Yz-yk-MPr*DUp-Mr*Du)+lambr*Du'*Du,Du,A,B);
+    H = 2*(Mr'*Mr + lambr*eye(Nu,Nu));
+    H = (H+H')/2;
+    f = -2*Mr'*(Yz-yk-MPr*DUp);
+    J = tril(ones(Nu,Nu));
+    U = ones(Nu,1)*F1in(k-1);
+    A_opt = [-J;J];
+    B_opt = [Umin+U;Umax-U];
+    test = quadprog(H,f,A_opt,B_opt,[],[],ones(Nu,1)*dumin, ones(Nu,1)*dumax, ws);
+%     OPTIONS = optimoptions('fmincon','UseParallel',true, 'MaxFunctionEvaluations', 150);
+%     Du = fmincon(@(Du)(Yz-yk-MPr*DUp-Mr*Du)'*(Yz-yk-MPr*DUp-Mr*Du)+lambr*Du'*Du,Du,A,B,[],[],ones(Nu,1)*-60,ones(Nu,1)*60);
+    Du = test.X;
     holder = Du(1);
     for i = D-1:-1:2
         DUp(i) = DUp(i-1);
@@ -207,36 +223,12 @@ for k=kp:kk
     hold on
     plot(F1in,'g')
     plot(yzad,"--r")
-    plot(FDc,"black")
+    xlabel("k")
+    legend("Wyjście regulatora", "Sterowanie")
     drawnow;
 
-end
-
-if draw
-%Plot wyjście
-f = figure;
-subplot(3,1,1)
-stairs(1:kk,h2)
-xlabel("k")
-ylabel("h_2")
-title(sprintf("h_2 error=%d",err_sum))
-ylim([25, 50])
-
-subplot(3,1,2)
-stairs(1:kk,FDc)
-xlabel("k")
-ylabel("Fd")
-title("Fd")
-ylim([0, 32])
-% exportgraphics(f,'odp_na_zmiane_zakl.pdf')
-
-subplot(3,1,3)
-stairs(1:kk,F1in)
-xlabel("k")
-ylabel("F_1_i_n")
-title("F_1_i_n")
-ylim([60, 90])
+    disp(k)
 end
 
 display(err_sum)
-
+save("SL_zakl")

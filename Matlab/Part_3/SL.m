@@ -38,8 +38,10 @@ end
 N = 1200;
 D = 1500;
 lamb = 1;
-Nu = 5;
+Nu = 1200;
 
+Umax = 140;
+Umin = 0;
 
 lamb = lamb*ones(1,il_fun);
 
@@ -94,7 +96,7 @@ FD0 = 15;
 v2_0 = h2_0^2 * C2;
 v1_0 = h1_0 * A1;
 
-t_sym = 20000; %czas symulacji
+t_sym = 5000; %czas symulacji
 T = 1; %krok
 
 ku = zeros(il_fun,D-1);
@@ -140,10 +142,7 @@ FDc(1:T:t_sym/T) = FD;
 
 %Skok wartosci zadanej:
 yzad(1:ks)=38.44; 
-yzad(ks:5000)=30;
-yzad(5000:10000)=80;
-yzad(10000:15000)=20;
-yzad(15000:20000)=40;
+yzad(ks:5000)=80;
 
 
 
@@ -206,12 +205,12 @@ for k=kp:kk
     J = tril(ones(Nu,Nu));
     U = ones(Nu,1)*F1in(k-1);
     A_opt = [-J;J];
-    B_opt = [0+U;300-U];
+    B_opt = [Umin+U;Umax-U];
     test = quadprog(H,f,A_opt,B_opt,[],[],ones(Nu,1)*dumin, ones(Nu,1)*dumax, ws);
 %     OPTIONS = optimoptions('fmincon','UseParallel',true, 'MaxFunctionEvaluations', 150);
 %     Du = fmincon(@(Du)(Yz-yk-MPr*DUp-Mr*Du)'*(Yz-yk-MPr*DUp-Mr*Du)+lambr*Du'*Du,Du,A,B,[],[],ones(Nu,1)*-60,ones(Nu,1)*60);
     Du = test.X;
-holder = Du(1);
+    holder = Du(1);
     for i = D-1:-1:2
         DUp(i) = DUp(i-1);
     end

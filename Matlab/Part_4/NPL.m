@@ -4,6 +4,7 @@ draw = true;
 sa = false;
 draw_f_przyn = false;
 set(0,'DefaultStairLineWidth',1);
+options = optimoptions('quadprog', "Algorithm","active-set"); options.Display = 'none'; 
 
 %% Zmienne modelu rozmytego
 
@@ -32,9 +33,16 @@ end
 
 N = 1200;
 D = 1500;
-lamb = 25;
-Nu = 5;
+lamb = 1;
+Nu = 1200;
 
+Umax = 140;
+Umin = 0;
+
+ws = optimwarmstart(zeros(Nu,1),options);
+
+dumin = -inf;
+dumax = inf;
 
 lamb = lamb*ones(1,il_fun);
 
@@ -80,7 +88,7 @@ FD0 = 15;
 v2_0 = h2_0^2 * C2;
 v1_0 = h1_0 * A1;
 
-t_sym = 20000; %czas symulacji
+t_sym = 5000; %czas symulacji
 T = 1; %krok
 
 ku = zeros(il_fun,D-1);
@@ -126,10 +134,7 @@ FDc(1:T:t_sym/T) = FD;
 
 %Skok wartosci zadanej:
 yzad(1:ks)=38.44; 
-yzad(ks:5000)=30;
-yzad(5000:10000)=80;
-yzad(10000:15000)=20;
-yzad(15000:20000)=40;
+yzad(ks:5000)=80;
 
 
 error = 0;
@@ -219,9 +224,18 @@ for k=kp:kk
     B(Nu+1:end) = (F1in(k-1)-30); 
     Yz(1:end)=yzad(k);
 
+     H = 2*(Mr'*Mr + lambr*eye(Nu,Nu));
+    H = (H+H')/2;
+    f = -2*Mr'*(Yz-Y0);
+    J = tril(ones(Nu,Nu));
+    U = ones(Nu,1)*F1in(k-1);
+    A_opt = [-J;J];
+    B_opt = [Umin+U;Umax-U];
+    test = quadprog(H,f,A_opt,B_opt,[],[],ones(Nu,1)*dumin, ones(Nu,1)*dumax,ws);
+    Du = test.X;
     %Różnica względem SL jest w uwzględnieniu Y0 zamiast stałego hoyzontu
     %jako h2 oraz braku macierzy MPr
-    Du = quadprog(@(Du)(Yz-Y0-Mr*Du)'*(Yz-Y0-Mr*Du)+lambr*Du'*Du,Du,A,B);
+    %Du = quadprog(@(Du)(Yz-Y0-Mr*Du)'*(Yz-Y0-Mr*Du)+lambr*Du'*Du,Du,A,B);
     holder = Du(1);
     for i = D-1:-1:2
         DUp(i) = DUp(i-1);
@@ -235,7 +249,10 @@ for k=kp:kk
     plot(yzad,"--r")
     drawnow;
 
+    disp(k)
+
 end
 
 display(err_sum)
+save("NPL_norm")
 

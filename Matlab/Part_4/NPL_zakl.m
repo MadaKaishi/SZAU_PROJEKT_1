@@ -4,6 +4,7 @@ draw = true;
 sa = false;
 draw_f_przyn = false;
 set(0,'DefaultStairLineWidth',1);
+options = optimoptions('quadprog', "Algorithm","active-set"); options.Display = 'none'; 
 
 %% Zmienne modelu rozmytego
 
@@ -32,9 +33,16 @@ end
 
 N = 1200;
 D = 1500;
-lamb = 60000;
-Nu = 5;
+lamb = 1;
+Nu = 1200;
 
+Umax = 140;
+Umin = 0;
+
+ws = optimwarmstart(zeros(Nu,1),options);
+
+dumin = -inf;
+dumax = inf;
 
 lamb = lamb*ones(1,il_fun);
 
@@ -80,7 +88,7 @@ FD0 = 15;
 v2_0 = h2_0^2 * C2;
 v1_0 = h1_0 * A1;
 
-t_sym = 15000; %czas symulacji
+t_sym = 5000; %czas symulacji
 T = 1; %krok
 
 ku = zeros(il_fun,D-1);
@@ -122,13 +130,14 @@ h2(1:kp) = h2_0;
 h1(1:kp) = h1_0;
 F1in(1:T:kp) = F1;
 FD = 15;
-Fdc(1:kp) = FD;
-FDc(kp:5000) = 30;
-FDc(5000:10000) = 15;
-FDc(10000:15000) = 7.5;
+FDc(1:T:t_sym/T) = FD;
 
 %Skok wartosci zadanej:
-yzad(1:kk)=38.44; 
+yzad(1:5000)=38.44; 
+FDc(1:ks) = FD;
+FDc(ks:3250) = FD+7.5;
+FDc(3250:5000) = FD-7.5;
+
 
 error = 0;
 w = zeros(1,il_fun);
@@ -217,9 +226,18 @@ for k=kp:kk
     B(Nu+1:end) = (F1in(k-1)-30); 
     Yz(1:end)=yzad(k);
 
+     H = 2*(Mr'*Mr + lambr*eye(Nu,Nu));
+    H = (H+H')/2;
+    f = -2*Mr'*(Yz-Y0);
+    J = tril(ones(Nu,Nu));
+    U = ones(Nu,1)*F1in(k-1);
+    A_opt = [-J;J];
+    B_opt = [Umin+U;Umax-U];
+    test = quadprog(H,f,A_opt,B_opt,[],[],ones(Nu,1)*dumin, ones(Nu,1)*dumax,ws);
+    Du = test.X;
     %Różnica względem SL jest w uwzględnieniu Y0 zamiast stałego hoyzontu
     %jako h2 oraz braku macierzy MPr
-    Du = fmincon(@(Du)(Yz-Y0-Mr*Du)'*(Yz-Y0-Mr*Du)+lambr*Du'*Du,Du,A,B);
+    %Du = quadprog(@(Du)(Yz-Y0-Mr*Du)'*(Yz-Y0-Mr*Du)+lambr*Du'*Du,Du,A,B);
     holder = Du(1);
     for i = D-1:-1:2
         DUp(i) = DUp(i-1);
@@ -231,35 +249,12 @@ for k=kp:kk
     hold on
     plot(F1in,'g')
     plot(yzad,"--r")
-    plot(FDc,"black")
     drawnow;
-end
 
-if draw
-%Plot wyjście
-f = figure;
-subplot(3,1,1)
-stairs(1:kk,h2)
-xlabel("k")
-ylabel("h_2")
-title(sprintf("h_2 error=%d",err_sum))
-ylim([25, 50])
+    disp(k)
 
-subplot(3,1,2)
-stairs(1:kk,FDc)
-xlabel("k")
-ylabel("Fd")
-title("Fd")
-ylim([0, 32])
-exportgraphics(f,'odp_na_zmiane_zakl.pdf')
-
-subplot(3,1,3)
-stairs(1:kk,F1in)
-xlabel("k")
-ylabel("F_1_i_n")
-title("F_1_i_n")
-ylim([60, 90])
 end
 
 display(err_sum)
+save("NPL_zakl")
 

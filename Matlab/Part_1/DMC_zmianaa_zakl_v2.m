@@ -1,15 +1,15 @@
 clear; clc;
 
-file = load("Odp_skok\odp_skok.mat");
+file = load("..\Part_1\Odp_skok\odp_skok.mat");
 s = file.s;
-
+set(0,'DefaultStairLineWidth',1);
 %Parametry regulatora
-Nu = 1400;
-N = 1400;
+Nu = 1200;
+N = 1200;
 D = 1400;
 lamb = 5;
 
-Umax = 300;
+Umax = 140;
 Umin = 0;
 
 %Parametry obiektu
@@ -29,7 +29,7 @@ FD = 15;
 v2_0 = h2_0^2 * C2;
 v1_0 = h1_0 * A1;
 
-t_sym = 15000; %czas symulacji
+t_sym = 5000; %czas symulacji
 T = 1; %krok
 
 
@@ -79,13 +79,13 @@ h1(1:kp) = h1_0;
 F1in(1:1000/T) = F1;
 F1in(1000/T:kk) = F1;
 FD = 15;
-FDc(1:kp) = FD;
-FDc(kp:5000) = 30;
-FDc(5000:10000) = 15;
-FDc(10000:15000) = 7.5;
+FDc(1:T:t_sym/T) = FD;
 
-
-yzad(1:kk)=38.44; 
+%Skok wartosci zadanej:
+yzad(1:5000)=38.44; 
+FDc(1:ks) = FD;
+FDc(ks:3250) = FD+7.5;
+FDc(3250:5000) = FD-7.5;
 
 
 error = 0;
@@ -124,12 +124,14 @@ for k=kp:kk
     del_u =  F1in(k) -  F1in(k-1);
 
 end
+
+%Plot wyjście
 f = figure;
+title(sprintf("h_2 error=%d",error))
 subplot(3,1,1)
 stairs(1:kk,h2)
 xlabel("k")
 ylabel("h_2")
-title(sprintf("h_2 error=%d",error))
 ylim([25, 50])
 
 
@@ -147,5 +149,7 @@ xlabel("k")
 ylabel("F_1_i_n")
 title("F_1_i_n")
 ylim([60, 90])
+
+exportgraphics(f,'odp_na_zmiane_zakl.pdf')
 
 display(error)
