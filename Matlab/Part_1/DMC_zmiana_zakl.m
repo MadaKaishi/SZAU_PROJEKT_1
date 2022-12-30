@@ -4,12 +4,12 @@ file = load("Odp_skok\odp_skok.mat");
 s = file.s;
 
 %Parametry regulatora
-Nu = 1500;
-N = 1500;
+Nu = 10;
+N = 200;
 D = 1500;
 lamb = 5;
 
-Umax = 300;
+Umax = 200;
 Umin = 0;
 
 

@@ -19,7 +19,7 @@ h = (h_min:1:h_max)';
 dumin = -inf;
 dumax = inf;
 
-nach = 3; %nachylenie funkcji 
+nach = 60; %nachylenie funkcji 
 
 d = (h_max-h_min)/il_fun; %szerokości funkcji przynależnośći
 c = h_min+d:d:h_max-d; %punkty przegięcia
@@ -35,10 +35,10 @@ end
 
 %% Parametry regulatora
 
-N = 1200;
+N = 300;
 D = 1500;
-lamb = 1;
-Nu = 1200;
+lamb = 2;
+Nu = 10;
 
 Umax = 140;
 Umin = 0;

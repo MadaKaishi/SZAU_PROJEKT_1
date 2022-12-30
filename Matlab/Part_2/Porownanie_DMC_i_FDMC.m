@@ -46,7 +46,7 @@ hold off;
 xlabel('k'); ylabel("h");
 legend("DMC","FDMC","h_2_z_a_d")
 title("Regulaotr DMC, error = " + DMCv.error + newline +"Regulator FDMC, error = " + FDMCv.err_sum )
-% exportgraphics(gca,'DMC_rozm_zmiana_wart.pdf')
+exportgraphics(gca,'DMC_rozm_por.pdf')
 
 %Plot sterowanie
 figure;
@@ -56,5 +56,5 @@ stairs(iteracja, FDMCv.F1in)
 legend("DMC","FDMC")
 xlabel('k'); ylabel("F_1_i_n");
 title("Sterowanie regulaotrów")
-% exportgraphics(gca,'DMC_rozm_zmiana_ster.pdf')
+exportgraphics(gca,'DMC_por_ster.pdf')
 end

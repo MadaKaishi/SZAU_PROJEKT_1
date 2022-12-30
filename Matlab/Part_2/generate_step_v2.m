@@ -43,7 +43,7 @@ h_min = 0;
 h_max = 90;
 h = (h_min:1:h_max)';
 
-nach = 3; %nachylenie funkcji 
+nach = 1; %nachylenie funkcji 
 
 d = (h_max-h_min)/il_fun; %szerokości funkcji przynależnośći
 c = h_min+d:d:h_max-d; %punkty przegięcia

@@ -1,7 +1,7 @@
 clear; clc;
 %% Parametry programu
 draw = true;
-sa = false;
+sa = true;
 draw_f_przyn = true;
 
 set(0,'DefaultStairLineWidth',1);
@@ -9,10 +9,10 @@ Umax = 200;
 Umin = 0;
 
 %% Parametry regulatora
-Nu = 1400;
-N = 1400;
-D = 1400;
-lamb = 5;
+Nu = 10;
+N = 300;
+D = 1500;
+lamb = 2;
 
 %liczba regulatorów
 il_fun = 5;
@@ -51,7 +51,7 @@ h_min = 0;
 h_max = 90;
 h = (h_min:1:h_max)';
 
-nach = 3; %nachylenie funkcji 
+nach = 60; %nachylenie funkcji 
 
 d = (h_max-h_min)/il_fun; %szerokości funkcji przynależnośći
 c = h_min+d:d:h_max-d; %punkty przegięcia
@@ -87,7 +87,7 @@ if draw_f_przyn
     xlabel("h_2"); ylabel("Funkcja przynależności");
     title(sprintf("Funkcja przynaleznosci dla %i zbiorów rozmytych",il_fun))
     if sa
-        print(sprintf('funkcja_przynelznosci_%i.png',il_fun),'-dpng','-r400')
+        print(sprintf('funkcja_przynelznosci_%i_kat%i.png',il_fun,nach),'-dpng','-r400')
     end
 end
 
@@ -224,15 +224,15 @@ hold off;
 xlabel('k'); ylabel("h");
 legend("h_2","h_2_z_a_d")
 title("Regulator FDMC, error = " + err_sum)
-% exportgraphics(gca,'DMC_rozm_zmiana_wart.pdf')
+exportgraphics(gca,sprintf('DMC_rozm_zmiana_wart_kat%i.pdf',nach))
 
 %Plot sterowanie
 figure;
 stairs(iteracja, F1in)
 legend("F_1_i_n")
 xlabel('k'); ylabel("F_1_i_n");
-title("Sterowanie regulaotra FDMC")
-% exportgraphics(gca,'DMC_rozm_zmiana_ster.pdf')
+title("Sterowanie regulatora FDMC")
+exportgraphics(gca,sprintf('DMC_rozm_zmiana_ster_kat%i.pdf',nach))
 end
 
 display(err_sum)

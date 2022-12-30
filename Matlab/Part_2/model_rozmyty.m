@@ -4,8 +4,12 @@ clear all;
 %% Parametry programu
 
 draw = true;
-sa = false;
+sa = true;
+draw_f_przyn = true;
+nach = 1; %nachylenie funkcji 
+
 il_fun = 5;
+
 set(0,'DefaultStairLineWidth',1);
 
 %% Definicja parametrów
@@ -36,7 +40,7 @@ h_min = 0;
 h_max = 90;
 h = (h_min:1:h_max)';
 err = 0;
-nach = 10; %nachylenie funkcji 
+
 
 d = (h_max-h_min)/il_fun; %szerokości funkcji przynależnośći
 c = h_min+d:d:h_max-d; %punkty przegięcia
@@ -52,6 +56,27 @@ m = (ap2/ap1)^2;
 hr01 = hr0.*m;
 vr2 = hr0.^2 * C2;
 Fr0 = ap1*hr01.^0.5-FD0;
+
+if draw_f_przyn
+    figure
+    hold on
+    %Plotter funkcji przynaleznosci
+    for i = 1:il_fun
+        if i == 1
+            plot(trapmf(h_min:1:h_max,[0 0 c(1)-nach/2 c(1)+ nach/2]));
+        elseif i == il_fun
+            plot(trapmf(h_min:1:h_max,[c(il_fun-1)-nach/2 c(il_fun-1)+nach/2 h_max h_max]));
+        else
+            plot(trapmf(h_min:1:h_max,[c(i-1)-nach/2 c(i-1)+ nach/2 c(i)-nach/2 c(i)+ nach/2]));
+        end
+    end
+    xlim([0 90])
+    xlabel("h_2"); ylabel("Funkcja przynależności");
+    title(sprintf("Funkcja przynaleznosci dla %i zbiorów rozmytych",il_fun))
+    if sa
+        print(sprintf('druga_funkcja_przynelznosci_%i_%i.png',il_fun,nach),'-dpng','-r400')  
+    end
+end
 
 %% Symulacja
 
@@ -137,5 +162,5 @@ display(err)
 
     title("Porownanie modeli rozmytych, nachylenie = " + nach + " error = " +err)
 if sa
-    print(sprintf("Porown_rozm_mod_il_%i_%i",il_fun,nach),'-dpng','-r400');
+    print(sprintf("Drugie_Porown_rozm_mod_il_%i_%i",il_fun,nach),'-dpng','-r400');
 end

@@ -51,7 +51,7 @@ h_min = 0;
 h_max = 90;
 h = (h_min:1:h_max)';
 
-nach = 3; %nachylenie funkcji 
+nach = 60; %nachylenie funkcji 
 
 d = (h_max-h_min)/il_fun; %szerokości funkcji przynależnośći
 c = h_min+d:d:h_max-d; %punkty przegięcia
@@ -87,7 +87,7 @@ if draw_f_przyn
     xlabel("h_2"); ylabel("Funkcja przynależności");
     title(sprintf("Funkcja przynaleznosci dla %i zbiorów rozmytych",il_fun))
     if sa
-        print(sprintf('funkcja_przynelznosci_%i.png',il_fun),'-dpng','-r400')
+        print(sprintf('funkcja_przynelznosci_%i_kat%i.png',il_fun,nach),'-dpng','-r400')
     end
 end
 
@@ -239,7 +239,7 @@ ylabel("F_1_i_n")
 title("F_1_i_n")
 ylim([60, 90])
 
-% exportgraphics(f,'odp_na_zmiane_zakl.pdf')
+% exportgraphics(f,sprintf('odp_na_zmiane_zakl_kat%i.pdf',nach))
 end
 
 display(err_sum)
